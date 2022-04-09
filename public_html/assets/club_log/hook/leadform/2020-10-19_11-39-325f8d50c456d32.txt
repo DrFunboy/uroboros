@@ -1,0 +1,1 @@
+{"name":"СПБ-Тест2","email":"test2@spb.shagi.online","contact":"Sabir Test2","tel":"+79854363706","alias":"spb"}

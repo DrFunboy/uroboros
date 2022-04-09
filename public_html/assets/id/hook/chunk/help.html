@@ -1,0 +1,448 @@
+<!-- [[-Profile? &prefix=`usr.`]] -->
+<script>
+$.views.converters({
+    join: function(arr) {
+        return arr.join(', ');
+    }
+});
+SCRM._service['/chunk/help'] = function(param) {
+    if (!SCRM.app.user) SCRM.app.user = {};
+    var usr = {
+        name: SCRM.app.user.fullname, // '[[-+usr.fullname]]',
+        email: SCRM.app.user.email, //'[[-+usr.email]]',
+        tel: SCRM.app.user.mobilephone// '[[-+usr.mobilephone]]'
+    };
+    var club_key = '[[++club_key]]';
+
+    var hstart = (param.data && param.data.help)? param.data.help : param.start;
+    
+    if (hstart == 'kb') {
+        var mdl = {
+            title: '#hlp_kb_title',
+            body: '#hlp_kb',
+            cm_size: 'lg',
+            s: SCRM,
+            kb: {
+                relative: [],
+                all: []
+            },
+            doc: null,
+            printHelpTopic: function(e) {
+                SCRM.loadWSS('printThis', function(){
+                    $(mdl.mdl)
+                    .printThis({
+                        pageTitle: 'SportCRM - '+mdl.doc.name,
+                        printContainer: true,
+                        printDelay: 500
+                    });
+                });
+            }
+        };
+        club_Drawer(mdl, {
+            showDoc: function(e, data) {
+                var d = data.linkCtx.data;
+                if (d.cls=='link') return true;
+                e.preventDefault();
+                SCRM.scrmYTloaded = function(e) {
+                    SCRM.link(mdl, {
+                        loaded: true
+                    });
+                };
+                SCRM.link(mdl, {
+                    doc: d
+                });
+            },
+            showList: function(e, data) {
+                SCRM.link(mdl, {
+                    doc: null
+                });
+            }
+        });
+        pJSON('/data/status/idHelp', function(data){
+            var helpRows = [], current;
+            $.each(data.rows, function(i, v){
+                const icons = {
+                    youtube: 'fa-video-camera',
+                    link: 'fa-external-link'
+                };
+                v.ico = icons[v.cls] || 'fa-book';
+                
+                if (v.cls=='=') {
+                    helpRows.push(v);
+                    v.rows = [];
+                    current = v;
+                } else {
+                    current.rows.push(v);
+                }
+            });
+            SCRM.link(mdl, {
+                all: data.rows,
+                helpRows: helpRows
+            });
+            $('.scrm-kb-title:eq(0) button', mdl.mdl).click();
+        });
+    }
+
+
+    if (hstart == 'about') {
+        var mdl = {
+            mdl_id: 'AboutSCRM',
+            title: 'Система управления спортивными клубами',
+            body: '#hlp_about',
+            s: SCRM, u: usr,
+            mxq: $('body').data('mxq')
+        };
+        club_Modal(mdl);
+    }
+
+    if (hstart == 'tech') {
+        if (!SCRM.SD) SCRM.SD = {
+            subj: '',
+            info: '',
+            key: club_key
+        };
+        $.extend(SCRM.SD, usr, {
+            url: window.btoa(unescape(encodeURIComponent(window.location.href))) //utf8_to_b64
+        });
+        var mdl = {
+            mdl_id: 'SdSCRM',
+            postData: SCRM.SD,
+            title: 'Техническая поддержка',
+            body: '#hlp_tech',
+            cm_size: 'lg',
+            new_sd: function(e) {
+                e.preventDefault();
+
+                var formData = new FormData(e.target);
+                $.each(mdl.postData, function(key, value){
+                    formData.append(key, value);
+                });
+
+                SCRM.link(mdl, {loading: true});
+                $.ajax({
+                    url: 'https://w.sportcrm.club/hook/sd/new',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false // Set to false as jQuery will tell the server its a query string request
+                })
+                .done(function(data){
+                    SCRM.link(mdl, {
+                        sent: true,
+                        'postData.subj': '',
+                        'postData.info': ''
+                    });
+                })
+                .always(function(data){
+                    SCRM.link(mdl, {loading: false});
+                })
+                .fail(failXHR);
+            }
+        };
+        
+        club_Drawer(mdl);
+        mdl.mdl.one('show.bs.tab', '[href="#t_list"]', function(e){
+            $('#TechSupportDates', mdl.mdl)
+            .on('periodChange', function(e, dates){
+                pJSON('https://w.sportcrm.club/hook/sd/list', $.extend(mdl.postData, dates), function(data){
+                    SCRM.link(mdl, {list_sd: data.rows});
+                });
+            })
+            .panelPeriod();
+        });
+    }
+
+
+    if (hstart == 'adm') {
+        var mdl = {
+            title: 'Написать в Администрацию',
+            body: '#hlp_adm',
+            cm_size: 'lg',
+            post: usr, s: SCRM,
+            new_msg: function(e) {
+                e.preventDefault();
+                
+                SCRM.link(mdl, {loading: true});
+                var formData = new FormData(e.target);
+                $.each(mdl.post, function(key, value){
+                    formData.append(key, value);
+                });
+
+                $.ajax({
+                    url: '/hook/msg.adm',
+                    type: 'POST',
+                    //dataType: 'json',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false // Set to false as jQuery will tell the server its a query string request
+                })
+                .done(function(data){
+                    SCRM.link(mdl, {
+                        ok: true
+                    });
+                })
+                .always(function(data){
+                    SCRM.link(mdl, {loading: false});
+                })
+                .fail(failXHR);
+            }
+        };
+        
+        club_Drawer(mdl);
+        $('.custom-file > .custom-file-label', mdl.mdl).each(function () {
+            $(this).data('label', $(this).text())
+        });
+    }
+};
+
+// update label text with current input value
+$(document).on('change', '.custom-file > .custom-file-input', function () {
+    const files = this.files
+    const $fileLabel = $(this).next('.custom-file-label')
+    // use when no file chosen
+    const $originLabel = $fileLabel.data('label')
+    
+    // truncate text when user chose more than 2 files
+    $fileLabel.text(files.length + ' files selected')
+    
+    if (files.length <= 2) {
+        let fileNames = []
+        for (let i = 0; i < files.length; i++) {
+            fileNames.push(files[i].name);
+        }
+        $fileLabel.text(fileNames.join(', '));
+    }
+    
+    // reset label text if no file chosen
+    if (!files.length) {
+        $fileLabel.text($originLabel);
+    }
+});
+
+</script>
+
+<script id="hlp_kb_title" type="text/x-jsrender">
+    {^{if doc}}
+    <button type="button" class="btn btn-subtle-primary rounded-pill btn-sm" title="Список" data-link="{on ~showList}">
+        <i class="fa fa-chevron-left"></i>
+    </button>
+    <button class="btn btn-subtle-primary rounded-pill btn-sm" data-link="{on printHelpTopic}">
+    <i class="fa fa-print"></i> Напечатать
+    </button>
+    {{else}}
+    База знаний
+    {{/if}}
+</script>
+
+<script id="hlp_kb" type="text/x-jsrender">
+<div data-link="visible{:!doc}">
+    {^{for helpRows}}
+        <h4 class="section-title scrm-kb-title" id="headingKb{{:id}}">
+        <button class="btn btn-reset" data-toggle="collapse" data-target="#listKb{{:id}}" aria-controls="listKb{{:id}}">
+            <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+            <span>{{:name}}</span>
+        </button>
+        </h4>
+        <div id="listKb{{:id}}" class="collapse list-group list-group-bordered mb-2" aria-labelledby="headingKb{{:id}}"
+            data-link="{for rows tmpl='#hlp_kb_item'}"></div>
+    {{/for}}
+</div>
+<div data-link="{if doc tmpl='#hlp_kb_doc'}"></div>
+</script>
+
+<script id="hlp_kb_doc" type="text/x-jsrender">
+{^{if doc^cls=='youtube'}}
+    <h2 data-link="doc.name"></h2>
+    <div class="mb-2" data-link="doc.info"></div>
+    <div class="alert alert-info" data-link="visible{:!loaded}">YouTube loading...</div>
+    <div class="embed-responsive embed-responsive-16by9">
+        <iframe src="https://www.youtube.com/embed/{{:doc.alias}}?autoplay=1&test=1"
+            width="853" height="480" allowfullscreen allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            id="scrm-kb-yt" onload="SCRM.scrmYTloaded(this);"></iframe>
+    </div>
+{{else doc^cls=='notion'}}
+    <iframe src="https://dev.sportcrm.club/assets/notion/{{:doc.alias}}.html"
+        scrolling="no" frameborder="0" style="height:300px;width:100%" name="scrm-notion"></iframe>
+{{else}}
+    <iframe src="https://dev.sportcrm.club/hook/kb/{{:doc.alias}}?club=[[++club_key]]"
+        scrolling="no" frameborder="0" style="height:300px;width:100%" name="scrm-kb"></iframe>
+{{/if}}
+</script>
+
+<script id="hlp_kb_item" type="text/x-jsrender">
+    <a href="#" class="list-group-item list-group-item-action" target="_blank"
+        data-link="href{:(cls=='link')? info : '#'} {on ~showDoc}">
+        <span class="list-group-item-figure">
+            <i class="fa {{:ico}}"></i>
+        </span>
+        <span class="list-group-item-body">{{:name}}</span>
+    </a>
+</script>
+
+
+<script id="hlp_about" type="text/x-jsrender">
+    <p class="mb-4 text-center scrm-about">
+    <a href="https://sportcrm.club?utm_source=about-logo" target="_blank">
+    <img class="mx-auto d-block img-fluid" src="[[++crm_url]]images/sportcrm_logo.png" alt="SportCRM">
+        https://sportcrm.club</a></p>
+    
+    <p class="small text-muted">vers: {{:s.vers}}, q: {{:mxq}}, city: {{:s.app.club_city}}, club_id: {{:s.app.club_id}}</p>
+    <p class="small text-muted">{{join:s.app.ugroups}}</p>
+    [[-!#SESSION.club_debug]]
+</script>
+
+<script id="hlp_tech1" type="text/x-jsrender">
+    <iframe src="https://w.sportcrm.club/dhandlers/scrm-sd.html?contact={{url:u.name}}&email={{url:u.email}}&tel={{url:u.tel}}&key=[[++club_key]]&url={{:url}}"
+    scrolling="no" frameborder="0" style="height:300px;width:100%" name="scrm-tech" class="mt-n2"></iframe>
+</script>
+
+<script id="hlp_adm" type="text/x-jsrender">
+<form action="" method="post" role="form" enctype="multipart/form-data"
+    data-link="{on 'submit' new_msg} visible{:!ok}">
+<fieldset>
+    [[-<input type="hidden" name="name" value="[[+usr.fullname]] | [[+usr.mobilephone]]" />
+    <input type="hidden" name="email" value="[[+usr.email]]" />]]
+    <div class="form-group">
+        <label>От кого</label>
+        <a href="/login/profile.html" target="_blank" class="d-block">
+            {{:post.name}} | {{:post.email}} | {{:post.tel}}
+        </a>
+    </div>
+    
+    <div class="form-group">
+        <label for="sd_info" class="control-label">Текст сообщения <abbr>*</abbr></label>
+        <textarea class="form-control" rows="4" id="sd_info" name="info"
+            data-link="info"></textarea>
+    </div>
+
+    <div class="form-group">
+        <div class="custom-file">
+            <input type="file" class="custom-file-input" id="sd_file" name="file[]" multiple="multiple">
+            <label class="custom-file-label" for="sd_file">Приложить файлы</label>
+        </div>
+    </div>
+    <button type="submit" value="" class="btn btn-sm btn-primary"
+        data-link="disabled{:!info||loading}">
+        Отправить заявку
+        <span class="spinner-border spinner-border-sm" role="status" data-link="visible{:loading}"></span>
+    </button>
+</fieldset>
+</form>
+<div class="alert alert-success mt-2 mb-0" role="alert"
+    data-link="visible{:ok}">Ваше сообщение отправлено. Специалист ответит в ближайшее время.<br>Копия сообщения отправлена на ваш e-mail.</div>
+</script>
+
+[[$panelPeriod]]
+
+<script id="hlp_tech" type="text/x-jsrender">
+    <nav class="nav-scroller border-bottom mb-3">
+        <div class="nav nav-tabs" role="tablist">
+            <a class="nav-item nav-link active" data-toggle="tab" href="#t_new"><i class="fa fa-plus"></i></a>
+            <a class="nav-item nav-link" data-toggle="tab" href="#t_list"><i class="fa fa-tasks"></i></a>
+        </div>
+    </nav>
+    
+    <div class="tab-content card1 card-body1">
+        <div id="t_new" class="tab-pane active" data-link="{include tmpl='#new_sd'}"></div>
+        <div id="t_list" class="tab-pane">
+            <div id="TechSupportDates" class="mb-3"></div>
+            <div class="spinner-parent table-responsive">
+                <table class="table table-hover mb-0">
+                <tbody data-link="{for list_sd tmpl='#list_sd'}">
+                    
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="new_sd" type="text/x-jsrender">
+    <form action="" method="post" enctype="multipart/form-data" class="form-horizontal" data-link="{on 'submit' new_sd}">
+    <fieldset data-link="disabled{:loading}">
+        <div class="form-group row">
+            <label for="name" class="col-lg-3 text-lg-right">Пользователь</label>
+            <div class="col-lg-9">
+                <a href="/login/profile.html" target="_blank"
+                    data-link="html{:postData.name+' | '+postData.email+' | '+postData.tel}"></a>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label for="sd_subj" class="col-lg-3 text-lg-right">Тема <abbr>*</abbr></label>
+            <div class="col-lg-9">
+            <input type="text" id="sd_subj" class="form-control clubmodal-focus" data-link="postData^subj" name="subj" />
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label for="sd_info" class="col-lg-3 text-lg-right">Опишите проблему подробнее</label>
+            <div class="col-lg-9">
+            <textarea  class="form-control" rows="4" id="sd_info" name="info"
+                data-link="postData^info"></textarea>
+            </div>
+        </div>
+    
+        <div class="row">
+            <div class="col-lg-9 offset-lg-3">
+                <div class="mb-3">
+                    <input type="file" class="custom-file-input1" id="file" name="file[]" multiple="multiple">
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary"
+                    data-link="disabled{:!postData^subj}">
+                    Отправить заявку
+                    <span class="spinner-border spinner-border-sm" role="status" data-link="visible{:loading}"></span>
+                </button>
+                <div class="alert alert-success mt-2 mb-0" role="alert"
+                    data-link="visible{:sent&&!postData^subj}">
+                Ваша заявка отправлена. Мы постараемся решить ваш вопрос в самое ближайшее время.</div>
+            </div>
+        </div>
+    </fieldset>
+    </form>
+</script>
+
+<script id="list_sd" type="text/x-jsrender">
+<tr>
+    <td>
+        {{:#index+1}}
+    </td>
+    <td>
+        <small>id: {{:id}}</small><br>
+        <span class="badge badge-{{:status_cls}}">
+        {{:status_name}}
+        </span>
+    </td>
+    <td class="issue-info">
+        <h6>{{:name}}</h6>
+        {{if info}}
+        <div class="text-muted">
+            {{:info}}
+        </div>
+        {{/if}}
+
+        {{if inforesult}}
+        <div class="conversation-inbound">
+            <div class="conversation-avatar">
+                <a href="#" class="tile tile-circle bg-muted">
+                    <i class="fa fa-wrench"></i>
+                </a>
+            </div>
+            <div class="conversation-message">
+                <div class="conversation-message-text">{{:inforesult}}</div>
+            </div>
+        </div>
+        {{/if}}
+
+    </td>
+    <td>
+        {{:contact}}
+    </td>
+    <td>
+        {{formatDate:created}}
+    </td>
+</tr>
+</script>

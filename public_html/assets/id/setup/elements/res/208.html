@@ -1,0 +1,117 @@
+<script>
+$(function(){
+    var reportTSalary = {
+        trows: {},
+        salary_cfg: [[!clubConfig?name=`salary_cfg`]]
+    };
+    
+    var trainers = {};
+    $.each([[!dbvalues?mode=`idTrainer`]].idTrainer, function(i, v){
+        trainers[v.id] = v.name;
+    });
+
+    $.observable(SCRM.app.topNavTabs).insert({
+        href: '#tbl_Salary', html: 'Зарплата', hook: 'dates'
+    });
+
+    //$('#tableTabs > .nav')
+    //    .append('<a href="#tbl_Salary" class="nav-link" data-toggle="tab">Зарплата</a>');
+    var tw = $('<div id="tbl_Salary" class="tab-pane"></div>').insertAfter('#tbl_byday');
+    
+    $.templates('#tpl_Salary').link(tw, reportTSalary);
+    
+    $(document)
+    .on('calculate', '[href="#tbl_Salary"]', function(e) {
+        spinnr(tw);
+        
+        pDATA('idSchedule', $.extend({
+            rows: 1001,
+            _report: 'idSchedule_table'
+        }, SCRM.tableData.dates), function(data){
+            var trows = { }, total = 0,
+                price1 = reportTSalary.salary_cfg.trainer,
+                price2 = reportTSalary.salary_cfg.trainer2;
+            $.each(data.rows, function(i, v){
+                var tr = key2obj(trows, v.trainer, {
+                    name: v.trainer_name,
+                    salary: 0,
+                    les: []
+                });
+
+                var salary1 = v.cnt_y * price1[0];
+                if (salary1 < price1[1]) salary1 = price1[1];
+                tr.salary += salary1;
+                total += salary1;
+                v['salary'+v.trainer] = salary1;
+                tr.les.push(v);
+                
+                if (v.trainer2 != '0') {
+                    var tr2 = key2obj(trows, v.trainer2, {
+                        name: trainers[v.trainer2] || '',
+                        salary: 0,
+                        les: []
+                    });
+
+                    var salary2 = v.cnt_y * price2[0];
+                    if (salary2 < price2[1]) salary2 = price2[1];
+                    tr2.salary += salary2;
+                    total += salary2;
+                    v['salary'+v.trainer2] = salary2;
+                    tr2.les.push(v);
+                }
+            });
+
+            SCRM.link(reportTSalary, {
+                trows: trows,
+                total: total
+            });
+            spinnr(false, tw);
+        });
+    });
+});
+</script>
+
+<script id="tpl_Salary" type="text/x-jsrender">
+<div class="card-body 1pt-0">
+    <div class="table-responsive mb-3">
+    <table class="table table-bordered table-sm table-hover m-0" style="width:auto">
+        <thead class="text-center">
+            <tr>
+                <th rowspan="2">N</th>
+                <th rowspan="2">Ф.И.О.</th>
+                <th>Сумма</th>
+                <th>Занятия</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+            {^{props trows sort='name'}} 
+            <tr data-id="{{>key}}">
+                <td class="text-right">{{:#index+1}}</td>
+                <td>
+                    {{>prop.name}}
+                </td>
+                <td class="text-right">{{>prop.salary}}</td>
+                <td>
+                    <button class="btn btn-reset" data-toggle="collapse"
+                        data-target="#les{{>key}}" aria-expanded="false" aria-controls="les{{>key}}">
+                        <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+                    </button>
+                    <div id="les{{>key}}" class="collapse">
+                        {{for prop.les sort="datestart" ~k=key}}
+                            <p>
+                            {{formatDateTime:datestart}}
+                            :: {{:cnt_y}}/{{:cnt_lesson}}
+                            :: <b>{{:#data['salary' + ~k]}}</b>
+                            </p>
+                        {{/for}}
+                    </div>
+                </td>
+            </tr>
+            {{/props}}
+        </tbody>
+    </table>
+    </div>
+    <p>Итого: <b data-link="total"></b></p>
+</div>
+</script>

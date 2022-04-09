@@ -1,0 +1,231 @@
+<!--
+бэк - assets/clubtools/hook/mcnTelecom.php
+виджет - modules/missCall
+привязка оператора к пользователю  - modules/mcnConnect
+
+модуль Пропущенные звонки - missCall
+модуль Привязка оператора - mcnConnect
+
+связь Conversation - idTalk
+связь Оператор MCN - idUser_mcn
+
+вид статуса Беседы - idTalk
+-->
+
+<script id="tpl_clubCallOperator" type="text/x-jsrender">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">ФИО</th>
+                <th scope="col">Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{for rows sort="extoken"}}
+            <tr>
+                <th>{{:extoken}}<div class="small text-muted">{{:extended.sip}}</div></th>
+                <td>{{:fullname}}</td>
+                <td>
+                    <div data-link="class{:online? 'tile tile-circle bg-success': 'tile tile-circle bg-dunger'}">
+                        [[-<span data-link="class{:online? 'fa fa-check': 'fa fa-ban'}"></span>]]
+                    </div>
+                </td>
+            </tr>
+            {{/for}}
+        </tbody>
+    </table>
+</script>
+
+<script id="tpl_clubCallAudio" type="text/x-jsrender">
+    <audio controls autoplay class="w-100">
+      <source src="{{url:url}}" type="audio/mp3">
+    </audio>
+</script>
+
+<script id="tpl_clubCallData" type="text/x-jsrender">
+    <div class="mb-2 d-flex align-items-center">
+        <button class="btn btn-sm btn-success mr-2" disabled><i class="fa fa-phone"></i></button>
+        <button class="btn btn-sm btn-secondary mr-2" data-link="{on showOperator}"><i class="fa fa-headphones"></i> Операторы</button>
+    </div>
+    <table id="grid_idTalk" data-entity="idTalk"></table>
+</script>
+
+<a href="#" id="missedCallMenu" class="nav-item nav-link prevent-default" data-link="class{merge:(total > 0) toggle='has-notified'} {on topClick}">
+    <i class="fa fa-phone-square"></i>
+</a>
+
+<script>
+window.club_Tab = function(tabData, handlers) {
+    var tabs = SCRM.app.topNavTabs;
+    $.extend(tabData, { });
+    if (!tabData.tab_id) tabData.tab_id = 'tab'+SCRM.uniqid();
+    var pageSection1 = $('#pageSection1');
+    if (!tabs.length) {
+        var tab1 = SCRM.uniqid();
+        pageSection1.addClass('tab-content')
+        .wrapInner('<div class="tab-pane" id="tab'+tab1+'"></div>');
+        SCRM.link(SCRM.app.topNavTabs).insert({
+            href: '#tab'+tab1,
+            html: SCRM.app.title
+        });
+    } else {
+        pageSection1 = $('.tab-content', pageSection1).eq(0);
+    }
+    SCRM.link(SCRM.app.topNavTabs).insert({
+        href: '#'+tabData.tab_id,
+        html: tabData.title
+    });
+    
+    $('<div class="tab-pane" data-link="id{:tab_id} {include tmpl=body}"></div>')
+    .appendTo(pageSection1)
+    .link(true, tabData);
+    tabData.tab = $('a[href="#'+tabData.tab_id+'"]').tab('show');
+    return tabData;
+}
+
+$(function() {
+    var callData = [[!runHook?hook=`hook/vpbx/missed`]];
+    callData.topClick = function(e) {
+        if (!callData.tData) {
+            callData.tData = club_Tab({
+                title: 'Звонки',
+                body: '#tpl_clubCallData',
+                showOperator: function(e) {
+                    pJSON("/hook/vpbx/operators", function(data){
+                        data = $.extend({
+                            title: 'Операторы',
+                            body: '#tpl_clubCallOperator'
+                        }, data);
+                        club_Modal(data);
+                    });
+                }
+            });
+            SCRM.loadWSS('grid', function () {
+                var defVal = '';
+                $.each(callData.clubStatus, function(k, v){
+                    if (v.alias == 'callinBegin') defVal = v.id;
+                });
+                grids.idTalk = $("#grid_idTalk").jqGridInit({
+                    sortname: 'id', sortorder: 'desc',
+                    search: true,
+                    autowidth: true,
+                    colModel: [
+                        {name: 'id', template: idFieldTemplate},
+                        {name:'status', width:180,
+                            searchoptions: {
+                                defaultValue: defVal
+                            },
+                            template: selTemplate,
+                            clubStatus: 'idTalk', lookupKey: 'id'
+                        },
+                        {name:'local', label:'Внутренний', width: 90, hidden: true},
+                        {name:'foreign', label:'Внешний', width: 90},
+                        {name:'fullname', label:'Оператор'},
+                        {template: createdTemplate, hidden: false, label: 'Создано'},
+                        {name:'duration', label:'Продолжительность', width: 65, 
+                            formatter: function(cv, ops, row){
+                                if (!cv || cv=='null') return '';
+                                var sec = cv*1, m = Math.floor(sec/60);
+                                sec = sec % 60;
+                                return '<a href="#" data-talk="'+row.extid+'" class="prevent-default">'+ (''+m).padStart(2,'0') +':'+ (''+sec).padStart(2,'0') +'<i class="ml-2 fa fa-play fa-lg"></i></a>';
+                            }
+                        },
+                        {label:'Перезвонить', width: 80, 
+                            align: 'center',
+                            formatter: function(cv, ops, row){
+                                return '<a href="#" data-phone="'+row.foreign+'" class="prevent-default"><i class="fa fa-phone fa-lg"></i></a>';
+                            }
+                        },
+                        {name: 'info', template: infoTemplate, editable: true},
+                    ],
+                    navOpts: {add: true, edit: true, del: true}
+                })
+                .jqGrid('filterToolbar')
+                .jqGridColumns();
+            });
+        }
+    };
+    
+    
+    var updateCallData = function() {
+        setTimeout(function() {
+            pJSON('/hook/vpbx/missed', function(data){
+                SCRM.link(callData, data);
+            });
+            updateCallData();
+        }, SCRM.randInt(5*60*1000, 7*60*1000));
+    };
+    updateCallData();
+    
+    
+    $("#missedCallMenu")
+    .insertBefore('#scrmHelpMenu')
+    .link(true, callData);
+    
+    $(document)
+    .on('click', '[data-talk]', function(e){
+        var link = $(this),
+            callId = link.data('talk');
+            
+        var audioMdl = {
+    		body: '#tpl_clubCallAudio',
+    		url: "/hook/vpbx?call_id="+callId
+    	};
+    	club_Modal(audioMdl);
+    })
+    .on('click', '[data-phone]', function(e,d){
+        pJSON("/hook/vpbx", {
+            phone: $(this).data('phone')
+        }, function(answer){
+            if (answer.status && answer.status == "success") SCRM.success("Начинаю звонок");
+            else alert((answer.errors || [{}])[0].description);
+        });
+    })
+
+    /*
+        
+    SCRM.loadWSS('grid', function () {
+        var params = window
+        .location
+        .search
+        .replace('?','')
+        .split('&')
+        .reduce(
+            function(p,e){
+                var a = e.split('=');
+                p[ decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
+                return p;
+            },
+            {}
+        );
+        
+        SCRM.link(SCRM.app, {
+            topNavTabs: [
+                {href: '#tab_idTalk', html: 'Звонки', active: true},
+                {href: '#tab_operator', html: 'Операторы'}
+            ]
+        });
+        
+        
+        
+        .one('shown.bs.tab', 'a[href="#tab_operator"]', function (e) {
+            
+            var userOper = {};
+            $.link(true, "#tab_operator", userOper);
+            
+            function loadUserData(){
+                pJSON("/hook/vpbx", {
+                    operData: true
+                }, function(userData){
+                    $.observable(userOper).setProperty("userData", userData);
+                    setTimeout(loadUserData, 1000*60*3);
+                });
+            }
+            
+            loadUserData();
+        })
+        
+    });*/
+});
+</script>

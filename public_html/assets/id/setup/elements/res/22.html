@@ -1,0 +1,19 @@
+<iframe src="https://w.sportcrm.club/dhandlers/scrm-sd.html?contact=[[!+modx.user.id:userinfo=`fullname`:urlencode]]&email=[[!+modx.user.id:userinfo=`email`:urlencode]]&tel=[[!+modx.user.id:userinfo=`mobilephone`:urlencode]]&key=[[!++club_key]]&mode=[[!#GET.mode]]"
+    scrolling="no" style="height:300px;width:100%" frameborder="0"
+    class="mt-n3"
+    onload="window.addEventListener('message',(function(e){if(e.data.i_h)this.style.height=e.data.i_h+'px';}).bind(this));"></iframe>
+
+
+[[-!googleData?key=`1vlCf0eQgeepvtOecUxDbehO4ggGKr00vqPpQvVT_vPc/2`
+    &debug=`7`
+    &fields_to=`date,text,author`
+    &fields_from=`gsx:исполнено,gsx:комментарийисполнителя,gsx:автор`
+    &tpl=`chlogFact`
+]]
+
+[[-!googleData?key=`1vlCf0eQgeepvtOecUxDbehO4ggGKr00vqPpQvVT_vPc/1`
+    &debug=`6`
+    &fields_to=`text,status,date,author,addtext`
+    &fields_from=`gsx:запрос,gsx:статус,gsx:дата,gsx:автор,gsx:подробности`
+    &tpl=`chlogPlan`
+]]

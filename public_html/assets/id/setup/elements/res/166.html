@@ -1,0 +1,66 @@
+<script id="tplBadgesItems" type="text/x-jsrender">
+<div class="row">
+    {^{for rows}}
+    <div class="{{if !~root.modal}} col-xl-3 col-lg-4 {{/if}}col-6">
+        <div class="card card-figure  animated rollIn">
+            <figure class="figure">
+                <div class="figure-img">
+                    <img class="img-fluid" src="{{:filepath}}" alt="{{:name}}">
+                </div><!-- /.figure-img -->
+            </figure><!-- /.card-figure -->
+        </div><!-- /.card -->
+    </div>
+    {{/for}}
+</div>
+</script>
+
+<script>
+$.observable(sp_data.addMenu).insert({
+    id: 'tab_badges',
+    name: 'Значки'
+});
+
+
+getDataRows('idChanges', {_where: 'chfield=badge', rows: 1001}, function(badge){
+    var tpl = '#tplBadgesItems';
+    var spBadges = {};
+    $.templates(tpl).link('#tab_badges', spBadges);
+
+    console.log(badge);
+    var myKeys = $.map(badge.rows, function(v, i){
+        return v.newvalue;
+    });
+    
+    pJSON(files_url, {
+        uid: 'clubBadges'
+    }, function(data){
+        var myBadges = $.map(data.rows, function(v, i){
+            if ($.inArray(v.key, myKeys) >= 0) return v;
+        });
+        $.observable(spBadges).setProperty('rows', myBadges);
+
+        if (myBadges.length > 0) {
+            var last = $.map(myBadges, function(row, i){
+                if (i<2) return row;
+            });
+            
+            club_Modal({
+                rows: last,
+                modal: true,
+                body: tpl,
+                title: 'Новые значки'
+                //ok: 'Посмотреть все'
+                [[-onOK: function(mdl, spin) {
+                    blnk.click();
+                }]]
+            });
+        }
+    });
+});
+
+[[-$(document).on('shown.bs.tab.tab_badges', 'a[href="#tab_badges"]', function (e) {
+    $(document).off('shown.bs.tab.tab_badges');
+    var tpl = $.templates('#tplBadgesItems');
+    
+});]]
+</script>

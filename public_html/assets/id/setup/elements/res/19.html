@@ -1,0 +1,77 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.1.1/pdfobject.min.js" integrity="sha512-4ze/a9/4jqu+tX9dfOqJYSvyYd5M6qum/3HpCLr+/Jqf0whc37VUbkpNGHR7/8pSnCFw47T1fmIpwBV7UySh3g==" crossorigin="anonymous"></script>
+
+<div id="helpManager" style="display:none" data-link="visible{:true}">
+    [[-<nav class="nav-scroller top2Nav" id="tableTabs">
+        <div class="nav nav-tabs" role="tablist">
+            <a class="nav-link active" data-toggle="tab" href="#tab_helpList">Инструкции</a>
+            <a class="nav-link" data-toggle="tab" href="#tab_helpShow" data-link="visible{:showHelp} text{:showHelp^name}"></a>
+        </div>
+    </nav>]]
+    <div class="tab-content section-block my-0">
+        <div id="tab_helpList" class="tab-pane active">
+            <div class="list-group list-group-bordered" data-link="{for rows tmpl='#tpl_helpRows'}"></div>
+        </div>
+        <div id="tab_helpShow" class="tab-pane" data-link="{include tmpl='#tpl_helpShow'}"></div>
+    </div>
+</div>
+
+<script id="tpl_helpRows" type="text/x-jsrender">
+    <a href="#" class="list-group-item list-group-item-action" data-link="{on ~showHelp}">{{:name}}</a>
+</script>
+
+<script id="tpl_helpShow" type="text/x-jsrender">
+    {^{if showHelp^cls == 'youtube'}}
+    <div class="embed-responsive embed-responsive-16by9">
+        <iframe data-link="src{:'https://www.youtube.com/embed/'+ showHelp^alias +'?autoplay=1'}"
+            width="853" height="480" allowfullscreen allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    </div>
+    {{else}}
+    <div id="PDFV" style="height:1000px"></div>
+    [[-<iframe width="100%" height="800" allowfullscreen
+        data-link="src{:'https://w.sportcrm.club/docs/help/'+ showHelp^alias +'.pdf'}"></iframe>]]
+    {{/if}}
+</script>
+
+
+<script>
+SCRM.link(SCRM.app, {
+    topNavTabs: [
+        {href: '#tab_helpList', html: 'Инструкции', active: true},
+        {href: '#tab_helpShow', html: '', hidden: true}
+    ]
+});
+
+var helpManager = {
+    rows: [[!clubStatus?tbl=`idHelp`]]
+};
+
+[[-$('#accordion').html( $.templates('#tpl_row').render({rows:rows}) );
+$('[data-key]').on('show.bs.collapse', function(e){
+    var el = $(this);
+    el.html('<div class="embed-responsive embed-responsive-16by9"><iframe width="853" height="480" src="https://www.youtube.com/embed/'+ el.data('key') +'?rel=0" allowfullscreen></iframe></div>');
+}).on('hide.bs.collapse', function(e){
+    $(this).empty();
+});]]
+
+$.link(true, '#helpManager', helpManager, {
+    showHelp: function(e, data) {
+        e.preventDefault();
+        SCRM.link(helpManager, {showHelp: data.linkCtx.data});
+        SCRM.link(SCRM.app.topNavTabs[1], {
+            html: helpManager.showHelp.name,
+            hidden: false
+        });
+        $('a[href="#tab_helpShow"]').click();
+        if (helpManager.showHelp.cls == 'pdf') {
+            var options = {
+                pdfOpenParams: { view: 'Fit' }
+            };
+            PDFObject.embed('https://w.sportcrm.club/docs/help/'+ helpManager.showHelp.alias +'.pdf', "#PDFV", options);
+        }
+    }
+});
+
+
+</script>
+
+

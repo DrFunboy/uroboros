@@ -1,0 +1,26 @@
+(IN `idsportsmen` int) MODIFIES SQL DATA 
+BEGIN
+
+Declare idpay int;
+Declare sumremain decimal(10,2) default 0;
+
+DECLARE done SMALLINT DEFAULT 0;
+
+DECLARE rows CURSOR FOR SELECT p.id, (p.`sum` - IFNULL(SUM(ip.`sum`), 0)) as sum_remain
+FROM @@@pay p LEFT JOIN @@@invoicepay ip ON (ip.idpay = p.id)
+WHERE p.sportsmen = idsportsmen AND p.`sum` > 0  AND p.`payd`=1
+GROUP BY p.id
+HAVING sum_remain > 0
+ORDER BY p.datepay;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+Open rows;
+REPEAT
+  FETCH rows INTO idpay, sumremain;
+  IF NOT done THEN
+    CALL @@@invoicepay_newpay(idsportsmen, idpay, sumremain);
+  END IF;
+UNTIL done END REPEAT;
+Close rows;
+
+END

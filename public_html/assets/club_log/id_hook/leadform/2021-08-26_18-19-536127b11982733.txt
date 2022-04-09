@@ -1,0 +1,1 @@
+{"tel":"0506697942","name":"Igor","city":"shagi"}

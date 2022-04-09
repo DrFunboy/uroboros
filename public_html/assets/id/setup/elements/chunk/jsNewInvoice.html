@@ -1,0 +1,100 @@
+<script id="tpl_newInvoice" type="text/x-jsrender">
+    <div class="form-group">
+        <select class="form-control" data-link="{:row:} {on 'change' ~chTypeInv}">
+        {^{for idInvoiceType}}
+            <option value="{{:#index}}">{{:name}}</option>
+        {{/for}}
+        </select>
+    </div>
+    <div class="form-group"><div class="input-group">
+        <label class="input-group-prepend" for="ni_date"><span class="input-group-text"><i class="fa fa-calendar"></i></span></label>
+        <input type="text" class="form-control datefield" id="ni_date">
+    </div></div>
+    <div class="form-group">
+        <div class="input-group">
+            <label class="input-group-prepend" for="ni_sum"><span class="input-group-text"><i class="fa fa-money"></i></span></label>
+            <input type="text" class="form-control" id="ni_sum" placeholder="0.00" data-link="post^sum">
+        </div>
+        <label data-link="visible{:idInvoiceType[row].id}">
+            <input type="checkbox" data-link="payd"> Оплачено
+        </label>
+    </div>
+
+    <div class="form-group">
+        <textarea rows="2" class="form-control" data-link="post^info" placeholder="Комментарий"></textarea>
+    </div>
+</script>
+
+<script>
+function newInvoice(invData) {
+    var rows = [];
+    if ('debt' in invData) {
+        if (invData.debt*1 > 0) {
+            rows.push({price: invData.debt, name: 'Задолженность -' + invData.debt});
+        }
+        rows.push({price: '', name: '-- Аванс --'});
+    }
+    $.extend(true, invData, {
+        idInvoiceType: rows,
+        post: {
+            oper: 'add'
+        },
+        body: '#tpl_newInvoice',
+        onOK: function(e, md) {
+            $.observable(md).setProperty('loading', true);
+            var row = invData.idInvoiceType[invData.row];
+            invData.post.typeinvoice = row.id;
+            invData.post.addpay = (row.id && invData.payd)? 1 : 0;
+            //console.log(table, invData.post)
+            var table = (row.id)? 'idInvoice' : 'idPay';
+            pEDIT(table, invData.post, function() {
+                md.mdl.trigger('clubUpdateSpData', {id: invData.post.sportsmen});
+                md.mdl_hide();
+            });
+            //return false;
+        }
+    }, invData.modal);
+
+    club_Modal(invData, {
+        chTypeInv: function(e, data){
+            //console.log(e, data, invData);
+            var idx = $(e.target).val();
+            $.observable(invData.post).setProperty('sum', invData.idInvoiceType[idx].price);
+        }
+    });
+    load_wss(['flatpickr'], function() {
+        flatpickr($('.datefield', invData.mdl)[0], {
+            onChange: function(selectedDates, dateStr, instance) {
+                var date = instance.formatDate(selectedDates[0], 'Y-m-d');
+                $.extend(invData.post, {
+                    datepay: date,
+                    dateinvoice: date
+                });
+            }
+        }).setDate('today', true);
+    });
+
+    function add_idInvoiceType() {
+        $.each(window.idInvoiceTypeData, function(i, v) {
+            rows.push(v);
+        });
+        var nd = {
+            idInvoiceType: rows
+        };
+        if (rows.length) {
+            nd.row = 0;
+            nd['post.sum'] = rows[0].price;
+        }
+        $.observable(invData).setProperty(nd);
+    }
+
+    if (!window.idInvoiceTypeData) {
+        pJSON(dbvaluesUrl, {mode: 'idInvoiceType'}, function(data){
+            window.idInvoiceTypeData = data.idInvoiceType;
+            add_idInvoiceType();
+        });
+    } else add_idInvoiceType();
+
+    return invData.mdl;
+}
+</script>

@@ -1,0 +1,119 @@
+<script>
+SCRM._service.newInvoice = function(invData) {
+    var rows = [];
+    if ('debt' in invData) {
+        if (invData.debt*1 > 0) {
+            rows.push({price: invData.debt, name: 'Задолженность -' + invData.debt});
+        }
+        rows.push({price: '', name: '-- Аванс --'});
+    }
+    
+    $.extend(true, invData, {
+        idInvoiceType: $.merge(rows, SCRM.idInvoiceTypeData || [] ),
+        invType: '',
+        post: {
+            oper: 'add'
+        },
+        body: '#tpl_newInvoice',
+        onOK: function(e, md) {
+            $.observable(md).setProperty('loading', true);
+            if (!invData.post.sportsmen && invData.sp) invData.post.sportsmen = invData.sp.id;
+            var table = 'idPay';
+            if (invData.post.typeinvoice) {
+                table = 'idInvoice';
+                invData.post.addpay = (invData.payd)? 1 : 0;
+            }
+            //console.log(table, invData.post)
+            pEDIT(table, invData.post, function() {
+                md.mdl.trigger('clubUpdateSpData', {id: invData.post.sportsmen});
+                md.mdl_hide();
+            });
+            //return false;
+        },
+        
+    }, invData.modal);
+
+    if (invData.sp) {
+        $.extend(invData, {
+            mdl_footer: '#tpl_copyPayLnk',
+            copyPayLink: function(e){
+                var txt = '[[!++site_url]]qpay?key='+ invData.sp.key;
+                if (invData.post.sum && invData.post.sum > 0) txt += '&total='+invData.post.sum;
+                var input = $('<input />').insertAfter(e.target).val(txt).focus().select();
+                document.execCommand('copy');
+                input.remove();
+            }
+        });
+    }
+
+    club_Modal(invData);
+
+    $.observe(invData, 'invType', function(e, data){
+        var invoiceType = invData.idInvoiceType[data.value];
+        $.observable(invData.post).setProperty({
+            sum: invoiceType.price,
+            typeinvoice: invoiceType.id
+        });
+    });
+
+    SCRM.loadWSS('flatpickr', function() {
+        flatpickr($('.datefield', invData.mdl)[0], {
+            onChange: function(selectedDates, dateStr, instance) {
+                var date = instance.formatDate(selectedDates[0], 'Y-m-d');
+                $.extend(invData.post, {
+                    datepay: date,
+                    dateinvoice: date
+                });
+            }
+        }).setDate('today', true);
+    });
+
+    function add_idInvoiceType() {
+        if (invData.idInvoiceType.length) setTimeout(function(){
+            $.observable(invData).setProperty('invType', '0');
+        }, 30);
+    }
+
+    if (!SCRM.idInvoiceTypeData) {
+        pJSON(dbvaluesUrl, {mode: 'idInvoiceType'}, function(data){
+            SCRM.idInvoiceTypeData = data.idInvoiceType;
+            $.observable(invData.idInvoiceType).insert(SCRM.idInvoiceTypeData);
+            add_idInvoiceType();
+        });
+    } else add_idInvoiceType();
+
+    return invData.mdl;
+}
+</script>
+
+<script id="tpl_newInvoice" type="text/x-jsrender">
+    <div class="form-group">
+        <select class="form-control" data-link="invType">
+        {^{for idInvoiceType}}
+            <option value="{{:#index}}">{{:name}}</option>
+        {{/for}}
+        </select>
+    </div>
+    <div class="form-group"><div class="input-group">
+        <label class="input-group-prepend" for="ni_date"><span class="input-group-text"><i class="fa fa-calendar"></i></span></label>
+        <input type="text" class="form-control datefield" id="ni_date">
+    </div></div>
+    <div class="form-group">
+        <div class="input-group">
+            <label class="input-group-prepend" for="ni_sum"><span class="input-group-text"><i class="fa fa-money"></i></span></label>
+            <input type="text" class="form-control clubmodal-focus" id="ni_sum" placeholder="0.00" data-link="post^sum">
+        </div>
+        <label data-link="visible{:post^typeinvoice}">
+            <input type="checkbox" data-link="payd"> Оплачено
+        </label>
+    </div>
+
+    <div class="form-group m-0">
+        <textarea rows="2" class="form-control" data-link="post^info" placeholder="Комментарий"></textarea>
+    </div>
+</script>
+
+<script id="tpl_copyPayLnk" type="text/x-jsrender">
+    <button class="btn btn-secondary"
+        data-link="{on copyPayLink}"><i class="fa fa-link"></i></button>
+</script>

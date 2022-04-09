@@ -1,0 +1,38 @@
+<table id="grid_idMsg" data-entity="idMsg"></table>
+
+<script>
+SCRM.loadWSS('grid', function () {
+    grids.idMsg = $("#grid_idMsg").jqGridInit({
+        sortname: 'id', sortorder: 'desc',
+        autowidth: true,
+        colModel:[
+            {template: idFieldTemplate},
+            {name:'type', width:50},
+            {template: createdTemplate, hidden: false},
+            {name:'msg_to', width:150, editable: true},
+            {name:'msg_subj', width:150, editable: true},
+            {name:'attempt', width:45, sorttype:'int', editable: true},
+            {name:'datestart', template:dateTimeTemplate},
+            {name:'ready', editable: true,
+                template: "booleanCheckboxFa",
+                editoptions: { defaultValue: "0" }
+            },
+            {name:'info', label:'E-mail', width:120,
+                hidden: true,
+                editable:true, edittype:'textarea',
+                editoptions:{rows:'7',cols:'40'},
+                editrules:{edithidden:true}
+            },
+            {name:'extended', 
+                hidden: true, hidedlg: true,
+                editable:true, edittype:'textarea',
+                editoptions:{rows:'3',cols:'40'},
+                editrules:{edithidden:true}
+            }
+        ],
+        navOpts: {add: true, edit: true, del: true}
+    })
+    .jqGrid('filterToolbar')
+    .jqGridColumns();
+});
+</script>

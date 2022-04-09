@@ -1,0 +1,32 @@
+<script>
+var my_addOrder = addOrder;
+addOrder = function(item, addData) {
+    var mdl = club_Modal({
+        getr_list: '25-27 (длина стопы 15,5-17,3 см);28-30 (длина стопы 17,4-19,3см);31-34 (длина стопы 19,4-22см);35-38 (длина стопы 22,1-24,6см);39-41 (длина стопы 24,7-27,5см);42-44 (длина стопы 28-30,5см)'
+            .split(';'),
+        body: '#tpl_addOpts',
+        okclose: false,
+        onOK: function(e, md) {
+            if (!md.g||!md.f) {
+                alrt('Не заполнено одно из полей');
+                return false;
+            }
+            my_addOrder(item, {
+                opts: item.sel_opts+';'+md.g+';'+md.f
+            });
+            md.mdl_hide();
+        }
+    });
+};
+</script>
+
+<script id="tpl_addOpts" type="text/x-jsrender">
+    <label>Размер Гетр</label>
+    <select class="form-control my-2" data-link="g">
+    {{for getr_list}}
+        <option value="{{:#data}}">{{:#data}}</option>
+    {{/for}}
+    </select>
+    <label>Фамилия игрока</label>
+    <input class="form-control" data-link="f">
+</script>

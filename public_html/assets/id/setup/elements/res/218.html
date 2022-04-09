@@ -1,0 +1,50 @@
+<script>
+SCRM._service.newCabinet = function(post, callback) {
+    callback = callback || {};
+    var addCabinet = {
+        postData: $.extend({
+            oper: 'add'
+        }, post),
+        ok: 'Создать',
+        body: '#tpl_newCabinet',
+        onOK: function(e, md){
+            $('[type="submit"]', md.mdl).click();
+        },
+        cabinetSubmit: function(e, data) {
+            e.preventDefault();
+            pJSON('/hook/newuser', addCabinet.postData, function(data){
+                if (data.error) {
+                    SCRM.alert('Error: ' + data.error);
+                } else {
+                    SCRM.success('Пользователь добавлен');
+                    if (callback.success) callback.success(data);
+                    addCabinet.mdl_hide();
+                }
+            });
+        }
+    };
+
+    club_Modal(addCabinet)
+    .on('hidden.bs.modal', function () {
+        if (callback.hidden) callback.hidden();
+    });
+}
+</script>
+
+<script id="tpl_newCabinet" type="text/x-jsrender">
+<form data-link="{on 'submit' cabinetSubmit}">
+    <div class="form-group">
+        <div class="form-label-group">
+            <input class="form-control" id="cab_name" data-link="postData^fullname" required>
+            <label for="cab_name">Ф.И.О.</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-label-group">
+            <input type="email" class="form-control" id="cab_email" data-link="postData^email" required>
+            <label for="cab_email">Email</label>
+        </div>
+    </div>
+    <input type="submit" class="d-none" />
+</form>
+</script>

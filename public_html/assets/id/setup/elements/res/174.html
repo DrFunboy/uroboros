@@ -1,0 +1,40 @@
+<!-- clubReport -->
+<script id="report_tpl" type="text/x-jsrender">
+<div class="alert alert-primary has-icon" role="alert">
+    <div class="alert-icon"><i class="fa fa-info"></i></div>
+    Отчет по спортсменам, которые занимаются в дополнительных группах.
+</div>
+    <table class="table table-hover m-0">
+        <thead>
+            <tr>
+                <th>Зал</th>
+                <th>Группа</th>
+                <th>Количество</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{for rows}}
+          <tr>
+            <td>{{:sq_club_name}}</td>
+            <td>{{:sq_level_name}}, {{:sq_name}}</td>
+            <td>
+            <a href="#" class="show-sportsmen-pnl badge badge-primary" data-w="ssq_add.squad={{:id}}">{{:cnt}}</a>
+            </td>
+          </tr>
+        {{/for}}
+        </tbody>
+    </table>
+</script>
+
+<script>
+$.observable(clubReport).setProperty('opts', {
+    postData : {
+        table: 'idSportsmen',
+        _report: 'idSportsmen_addgroups',
+        lessdata: 1
+    }
+});
+$(document).on('jqGridLoadComplete', function(e, data){
+    console.log(e, data);
+});
+</script>

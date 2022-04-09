@@ -1,0 +1,1 @@
+{"name":"СПБ-Тест","email":"test@spb.shagi.online","contact":"Sabir Test","tel":"+79854363705","city":"ШАГИ Санкт-Петербург"}

@@ -1,0 +1,79 @@
+<script id="tpl_panelPeriod" type="text/x-jsrender">
+    <div class="row">
+        <div class="col-sm-6 col-md-4 m-b-xs">
+            <select class="form-control selectPeriod" data-link="selPeriod">
+            <option value="">...</option>
+            {^{props period sort="prop.menuindex"}}
+                <option value="{{:key}}">{{:prop.name}}</option>
+            {{/props}}
+            </select>
+        </div>
+        <div class="col-sm-6 col-md-5 m-b-xs">
+            <input class="form-control d1">
+        </div>
+    </div>
+</script>
+
+<script>
+(function( $ ){
+
+$.fn.panelPeriod = function(){
+    var pp = this;
+
+    SCRM.loadWSS('flatpickr', function(){
+        var periods = { },
+            today = new Date(),
+            m = today.getMonth(),
+            y = today.getFullYear();
+        for (i = 0; i < 24; i++) {
+            periods[i] = {
+                name: flatpickr.l10ns.default.months.longhand[m]+' '+y,
+                d1d2: [new Date(y, m, 1), new Date(y, m+1, 0, 23, 59, 59)],
+                menuindex: i
+            };
+            if (m==0) { m = 11; y--; } else { m--; } // year
+        }
+
+        pp.each(function(){
+            var ppData = {
+                period: periods,
+                selPeriod: '',
+                d1d2: []
+            };
+            console.log(ppData);
+            var pnl = $(this).data('ppData', ppData);
+
+            $.templates('#tpl_panelPeriod').link(pnl, ppData);
+            
+            $.observe(ppData, 'selPeriod', function(e, data){
+                if (ppData.selPeriod) {
+                    ppData.calendar.setDate(ppData.period[ppData.selPeriod].d1d2, true);
+                }
+            });
+
+            ppData.calendar = flatpickr( $('.d1', pnl), {
+                mode:'range',
+                //locale: { rangeSeparator: ';' },
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length==2) {
+                        var nd = {
+                            d1: instance.formatDate(selectedDates[0], 'Y-m-d'),
+                            d2: instance.formatDate(selectedDates[1], 'Y-m-d')
+                        };
+                        
+                        if (nd.d1!=ppData.d1d2[0] || nd.d2!=ppData.d1d2[1]) {
+                            pnl.trigger('periodChange', nd);
+                            SCRM.link(ppData, {d1d2: [nd.d1, nd.d2]});
+                        }
+                        
+                    }
+                }
+            });
+            SCRM.link(ppData, {selPeriod: '0'});
+    	});
+    });
+	return pp;
+};
+
+})( jQuery );
+</script>

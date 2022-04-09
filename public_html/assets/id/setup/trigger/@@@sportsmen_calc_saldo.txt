@@ -1,0 +1,7 @@
+(IN `sportsmen_id` int) MODIFIES SQL DATA 
+BEGIN
+UPDATE @@@sportsmen s set s.saldo = 
+(SELECT IFNULL(SUM(p.sum), 0) FROM @@@pay p WHERE p.sportsmen = s.id AND p.payd = 1)
+- (SELECT IFNULL(SUM(i.sum), 0) FROM @@@invoice i WHERE i.sportsmen = s.id)
+WHERE s.id = sportsmen_id;
+END
