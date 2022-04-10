@@ -218,6 +218,26 @@
     array (
       0 => 
       array (
+        'text' => 'Console',
+        'parent' => 'components',
+        'action' => 'index',
+        'description' => 'Консоль для выполнения php-кода',
+        'icon' => 'images/icons/plugin.gif',
+        'menuindex' => 0,
+        'params' => '',
+        'handler' => '',
+        'permissions' => 'console',
+        'namespace' => 'console',
+        'action_controller' => NULL,
+        'action_namespace' => NULL,
+        'id' => 'console',
+        'children' => 
+        array (
+        ),
+        'controller' => '',
+      ),
+      1 => 
+      array (
         'text' => 'Установщик',
         'parent' => 'components',
         'action' => 'workspaces',

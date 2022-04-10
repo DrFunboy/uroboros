@@ -4,6 +4,9 @@
     'allow_tags_in_post' => '1',
     'modRequest.class' => 'modManagerRequest',
   ),
+  'aliasMap' => 
+  array (
+  ),
   'webLinkMap' => 
   array (
   ),
@@ -25,6 +28,10 @@
     array (
       1 => '1',
     ),
+    'OnLoadWebDocument' => 
+    array (
+      6 => '6',
+    ),
     'OnManagerPageBeforeRender' => 
     array (
       1 => '1',
@@ -32,6 +39,7 @@
     'OnMODXInit' => 
     array (
       2 => '2',
+      3 => '3',
     ),
     'OnPluginFormPrerender' => 
     array (
@@ -269,6 +277,212 @@ switch ($modx->event->name) {
       'moduleguid' => '',
       'static' => '0',
       'static_file' => 'core/components/pdotools/elements/plugins/plugin.pdotools.php',
+    ),
+    3 => 
+    array (
+      'id' => '3',
+      'source' => '0',
+      'property_preprocess' => '0',
+      'name' => 'clubPackage',
+      'description' => '',
+      'editor_type' => '0',
+      'category' => '1',
+      'cache_type' => '0',
+      'plugincode' => 'define(\'CRM_PATH\', MODX_ASSETS_PATH.\'id/\');
+define(\'CRM_URL\', MODX_ASSETS_URL.\'id/\');
+define(\'CRM_FILES\', MODX_BASE_PATH.\'files/\');
+
+define(\'CRMTOOLS_PATH\', MODX_ASSETS_PATH.\'clubtools/\');
+define(\'CRMTOOLS_URL\', MODX_ASSETS_URL.\'clubtools/\');
+define(\'CRM_LOGS\', MODX_ASSETS_PATH.\'scrm_log/\');
+
+//$modx->loadClass(\'modResource\'); // здесь потому что при сохранении в mgr 
+/*$modx->map[\'modResource\'][\'fields\'][\'club_id\'] = 0;
+$modx->map[\'modResource\'][\'fieldMeta\'][\'club_id\'] = array(
+	\'dbtype\' => \'int\',
+	\'phptype\' => \'integer\',
+	\'null\' => false,
+	\'default\' => 0,
+);*/
+
+if ($modx->context->key == \'web\') {
+    include_once(CRM_PATH.\'club_func.php\');
+    
+    /*$www = $modx->cacheManager->get("www");
+    if (empty($www)) {
+        $www = array();
+        foreach ($modx->getIterator(\'modUserGroup\', array(\'name:LIKE\' => \'www_%\')) as $gr) {
+            $www[$gr->get(\'description\')] = str_replace(\'www_\', \'\', $gr->get(\'name\'));
+        }
+        $modx->cacheManager->set("www", $www, 604800*4); //4*7 дней
+    }*/
+    
+    define(\'CRM_PREFIX\', \'ur_\');
+    
+    $userID = clubUser();
+    if (!empty($userID)) {
+        $userGroups = $modx->user->getUserGroupNames();
+    } else {
+        $userGroups = array();
+    }
+    
+    $modx->addPackage(\'idDB\', CRM_PATH.\'start/model/\', CRM_PREFIX);
+
+    $cache_path = CRM_PREFIX.\'/clubConfig/init\';
+    $club_opts = $modx->cacheManager->get($cache_path);
+    if (empty($club_opts)) {
+        $club_opts = clubConfig(\'club_modules,https\', 0, 1);
+
+        $club_opts[\'club_modules\'] = empty($club_opts[\'club_modules\'])? array() : explode(\',\', $club_opts[\'club_modules\']);
+        array_unshift($club_opts[\'club_modules\'], \'clubStuff\', CRM_PREFIX);
+        $club_opts[\'crm_url\'] = CRM_URL;
+        $club_opts[\'crmtools_url\'] = CRMTOOLS_URL;
+        $modx->cacheManager->set($cache_path, $club_opts, 86400*3); // 3 дней
+    }
+    
+    $club_opts[\'club_name\'] = $modx->getOption(\'site_name\');
+    $club_opts[\'scrm_ugroups\'] = $userGroups;
+    $club_opts[\'scrm_grhash\'] = empty($userGroups)? \'empty\' : cacheHash($userGroups);
+    $club_opts[\'vers\'] = $modx->getOption(\'vers\');
+    $club_opts[\'scrm_prugv\'] = cacheHash(array(CRM_PREFIX, $userID, $club_opts[\'scrm_grhash\'], $club_opts[\'vers\']));
+    
+    foreach($club_opts as $okey => $oval) {
+        $modx->setOption($okey, $oval);
+    }
+    $club_opts[\'site_url\'] = $modx->getOption(\'site_url\');
+    $modx->setPlaceholders($club_opts, \'+\');
+    
+    $rq = explode(\'/\', $_REQUEST[\'q\']);
+    
+    $hooks = array(
+        \'hook\' => "hook/{$rq[1]}.php",
+        \'pay\' => \'hook/pay.php\',
+        \'paycb\' => \'hook/pay.php\',
+        \'js\' => \'hook/js.php\',
+        \'data\' => \'club_data.php\',
+        \'chunk\' => \'hook/chunk.php\',
+        \'setup\' => \'setup/hook.php\',
+    );
+    $hook_file = $hooks[ $rq[0] ];
+    if (!empty($hook_file)) {
+        foreach (glob(\'{\'.implode(\',\', [CRMTOOLS_PATH, CRM_PATH]).\'}\'.$hook_file, GLOB_BRACE) as $hf) {
+            include_once($hf);
+            if (!empty($json)) echo( json_encode($json, JSON_UNESCAPED_UNICODE) );
+            die;
+        }
+        /*if (file_exists(CRMTOOLS_PATH.$hook_file)){
+            include_once(CRMTOOLS_PATH.$hook_file);
+            die;
+        } elseif (file_exists(CRM_PATH.$hook_file)){
+            include_once(CRM_PATH.$hook_file);
+            die;
+        }*/
+    }
+}',
+      'locked' => '0',
+      'properties' => 'a:0:{}',
+      'disabled' => '0',
+      'moduleguid' => '',
+      'static' => '0',
+      'static_file' => '',
+    ),
+    6 => 
+    array (
+      'id' => '6',
+      'source' => '1',
+      'property_preprocess' => '0',
+      'name' => 'clubScripts',
+      'description' => '',
+      'editor_type' => '0',
+      'category' => '0',
+      'cache_type' => '0',
+      'plugincode' => '$res = $modx->resource;
+$start = \'\'; $bottom = \'\'; $app = array(
+    \'club_id\' => $res->get(\'club_id\'),
+    \'club_city\' => $_SESSION[\'club_city\'],
+);
+if (defined(\'CRM_PREFIX\') && !empty($res->get(\'template\'))) {
+    //$modx->log(modX::LOG_LEVEL_ERROR,"Log2 ".json_encode($res->toArray(), JSON_UNESCAPED_UNICODE));
+
+    $cfg = clubConfig(\'StartupHTMLBlock,BottomHTMLBlock\'); //grid_rows
+    $start = $cfg[\'StartupHTMLBlock\'];
+    $bottom = $cfg[\'BottomHTMLBlock\'];
+    //$app[\'res\'] = $res->toArray(\'\',false,false,true);
+    //$app[\'res\'][\'content\'] = null;
+
+    $userID = clubUser();
+    $app[\'ugroups\'] = $ugroups = $modx->getOption(\'scrm_ugroups\');
+    if (!empty($ugroups)){
+        $app[\'is_crew\'] = isCrew();
+    }
+    /*$users_scripts = array();
+    foreach($clubStatus as $cs) {
+        if ($cs[\'tbl\'] != \'idPermission\') continue;
+        if (!empty($cs[\'extended\'][\'crew\'])) $users_scripts[] = $cs[\'alias\'];
+    }
+    
+    $is_crew = !empty(array_intersect($ugroups, $users_scripts));
+    if ($is_crew) {
+        $start .= "<script>
+            var club_city = \'{$_SESSION[\'club_city\']}\',
+            grid_rows = \'{$cfg[\'grid_rows\']}\';
+            dataUrl = \'".CRM_URL."id_data.php\';
+            editUrl = \'/hook/dbedit\';
+        </script>";
+    }*/
+    
+    $club_modules = $modx->getOption(\'club_modules\');
+    $clubStatus = getClubStatus(array(
+        \'tbl\' => \'idModule\',
+        \'cls:IN\' => $club_modules,
+    )); //idPermission
+    
+    //$bottom .= \'111\'.json_encode($club_modules);
+
+    $load_modules = array();
+    $pathReplace1 = array(\'{crm}\',\'{modules}\',\'{vers}\',\'{user}\', \'{prugv}\');
+    $pathReplace2 = array(
+        CRM_URL,
+        \'/handlers/modules/\',
+        \'v=\'.$modx->getOption(\'vers\'),
+        $userID,
+        $modx->getOption(\'scrm_prugv\'),
+    );
+    
+    foreach($clubStatus as $rowMod) {
+        if ($rowMod[\'tbl\'] != \'idModule\') continue;
+        $ext = $rowMod[\'extended\'];
+        //if (!in_array($rowMod[\'cls\'], $club_modules)) continue;
+        if (!empty($ext[\'group\'])) {
+            if (empty($ugroups)) continue;
+            $check_groups = array_merge(array(\'all\'), $ugroups);
+            if (empty(array_intersect(explode(\',\', $ext[\'group\']), $check_groups))) continue;
+        }
+        if (!empty($ext[\'club_id\']) && !in_array($app[\'club_id\'], explode(\',\', $ext[\'club_id\']))) continue;
+        if (!empty($ext[\'script\'])) {
+            $bottom .= \'<script src="\'. str_replace($pathReplace1, $pathReplace2, $ext[\'script\']) .\'"></script>\';
+        }
+        if (!empty($ext[\'load\'])) {
+            $load_modules[] = str_replace($pathReplace1, $pathReplace2, $ext[\'load\']);
+        }
+    }
+    if (!empty($load_modules)) {
+        $bottom .= \'<script>$(function(){SCRM.loadSeries(\'.json_encode($load_modules).\');});</script>\';
+    }
+
+    foreach (glob(CRM_START.\'load.php\', GLOB_BRACE) as $data_handler) require($data_handler);
+}
+
+$modx->setPlaceholders(array(
+    \'StartupHTMLBlock\' => \'<script>$.extend(SCRM.app, \'. json_encode($app) .\');</script>\'.PHP_EOL.$start,
+    \'BottomHTMLBlock\' => $bottom,
+));',
+      'locked' => '0',
+      'properties' => 'a:0:{}',
+      'disabled' => '0',
+      'moduleguid' => '',
+      'static' => '0',
+      'static_file' => '',
     ),
   ),
   'policies' => 

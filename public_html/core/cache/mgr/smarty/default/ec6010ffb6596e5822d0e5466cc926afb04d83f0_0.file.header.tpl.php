@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:19:10
+/* Smarty version 3.1.39, created on 2022-04-09 17:28:40
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/header.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_6251417ed96090_63972057',
+  'unifunc' => 'content_62519818c02ca8_74144480',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6251417ed96090_63972057 (Smarty_Internal_Template $_smarty_tpl) {
+function content_62519818c02ca8_74144480 (Smarty_Internal_Template $_smarty_tpl) {
 ?><!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" dir="<?php echo $_smarty_tpl->tpl_vars['_config']->value['manager_direction'];?>
 " lang="<?php echo $_smarty_tpl->tpl_vars['_config']->value['manager_lang_attribute'];?>

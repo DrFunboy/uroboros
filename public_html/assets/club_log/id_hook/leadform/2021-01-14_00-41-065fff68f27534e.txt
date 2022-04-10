@@ -1,1 +1,0 @@
-{"name":"СПБ-Тест","email":"test2021@spb.shagi.online","contact":"Sabir Test","tel":"+79854363706","city":"spb"}

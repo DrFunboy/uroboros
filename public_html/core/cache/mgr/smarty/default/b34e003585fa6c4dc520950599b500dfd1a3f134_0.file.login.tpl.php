@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:16:43
+/* Smarty version 3.1.39, created on 2022-04-09 20:12:49
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/security/login.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_625140eb3deb17_15246745',
+  'unifunc' => 'content_6251be91442636_45855475',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_625140eb3deb17_15246745 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6251be91442636_45855475 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_checkPlugins(array(0=>array('file'=>'/home/s/sportcrm/uroboros_start123_ru/public_html/core/model/smarty/plugins/modifier.replace.php','function'=>'smarty_modifier_replace',),));
 ?>
 <!doctype html>

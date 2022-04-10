@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:34:17
+/* Smarty version 3.1.39, created on 2022-04-09 17:36:33
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/resource/update.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_625145099cbf04_74079918',
+  'unifunc' => 'content_625199f1f1e4e1_16123015',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_625145099cbf04_74079918 (Smarty_Internal_Template $_smarty_tpl) {
+function content_625199f1f1e4e1_16123015 (Smarty_Internal_Template $_smarty_tpl) {
 ?><div id="modx-panel-resource-div"></div>
 <div id="modx-resource-tvs-div"><?php echo (($tmp = @$_smarty_tpl->tpl_vars['tvOutput']->value)===null||$tmp==='' ? '' : $tmp);?>
 </div>

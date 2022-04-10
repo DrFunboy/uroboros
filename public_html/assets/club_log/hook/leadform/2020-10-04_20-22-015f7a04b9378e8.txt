@@ -1,1 +1,0 @@
-{"name":"Иван Спортсмен","email":"test@shagi.online","contact":"Sabir Test","tel":"+79854363704"}

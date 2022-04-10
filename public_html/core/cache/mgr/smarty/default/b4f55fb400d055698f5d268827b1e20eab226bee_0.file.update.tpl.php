@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:25:48
+/* Smarty version 3.1.39, created on 2022-04-09 17:36:59
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/element/template/update.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_6251430c6f0a28_43696546',
+  'unifunc' => 'content_62519a0bd3d111_80710709',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6251430c6f0a28_43696546 (Smarty_Internal_Template $_smarty_tpl) {
+function content_62519a0bd3d111_80710709 (Smarty_Internal_Template $_smarty_tpl) {
 ?><div id="modx-panel-template-div"></div>
 <?php echo $_smarty_tpl->tpl_vars['onTempFormPrerender']->value;
 }

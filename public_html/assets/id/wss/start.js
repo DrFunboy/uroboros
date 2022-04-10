@@ -36,6 +36,7 @@ window.SCRM = {
             loadHTML(name, $.extend({
                 //postData: null,
                 callback: function(){
+                    console.log(SCRM, data)
                     SCRM._service[name](data, cb);
                 }
             }, cb));
@@ -773,6 +774,7 @@ $(function(){
     })
     .on('click', '[data-run]', function(e){
         e.preventDefault();
+
         var elm = $(this), linkData = elm.data();
         SCRM._run(elm.data('run'), {
             data: linkData,

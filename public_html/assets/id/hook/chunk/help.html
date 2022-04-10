@@ -87,7 +87,7 @@ SCRM._service['/chunk/help'] = function(param) {
     if (hstart == 'about') {
         var mdl = {
             mdl_id: 'AboutSCRM',
-            title: 'Система управления спортивными клубами',
+            title: 'Система управления обращениями',
             body: '#hlp_about',
             s: SCRM, u: usr,
             mxq: $('body').data('mxq')
@@ -285,9 +285,8 @@ $(document).on('change', '.custom-file > .custom-file-input', function () {
 
 <script id="hlp_about" type="text/x-jsrender">
     <p class="mb-4 text-center scrm-about">
-    <a href="https://sportcrm.club?utm_source=about-logo" target="_blank">
-    <img class="mx-auto d-block img-fluid" src="[[++crm_url]]images/sportcrm_logo.png" alt="SportCRM">
-        https://sportcrm.club</a></p>
+    <a href="#" target="_blank">
+    <img class="mx-auto d-block img-fluid" src="[[++crm_url]]images/snake.png" alt="SportCRM"></a></p>
     
     <p class="small text-muted">vers: {{:s.vers}}, q: {{:mxq}}, city: {{:s.app.club_city}}, club_id: {{:s.app.club_id}}</p>
     <p class="small text-muted">{{join:s.app.ugroups}}</p>

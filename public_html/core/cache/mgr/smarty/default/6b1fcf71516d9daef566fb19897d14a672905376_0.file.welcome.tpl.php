@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:19:10
+/* Smarty version 3.1.39, created on 2022-04-09 20:12:59
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/welcome.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_6251417eda4715_19446351',
+  'unifunc' => 'content_6251be9b48c787_28793031',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6251417eda4715_19446351 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6251be9b48c787_28793031 (Smarty_Internal_Template $_smarty_tpl) {
 ?><div id="modx-panel-welcome-div"></div>
 
 <div id="modx-dashboard" class="dashboard">

@@ -245,7 +245,7 @@ function isCrew($redirect = true) {
         
         $_SESSION['club_crew'] = false;
         
-        $clubStatus = getClubStatus('idPermission', 'extended');
+        $clubStatus = getClubStatus('idPermission');
         $ugroups = $modx->user->getUserGroupNames();
         
         foreach($clubStatus as $cs) {

@@ -19,7 +19,6 @@ $xpdo_meta_map['idStatus']= array (
     'published' => 1,
     'info' => NULL,
     'extended' => NULL,
-    'club_id' => 0,
   ),
   'fieldMeta' => 
   array (
@@ -92,13 +91,6 @@ $xpdo_meta_map['idStatus']= array (
       'dbtype' => 'text',
       'phptype' => 'json',
       'null' => true,
-    ),
-    'club_id' => 
-    array (
-      'dbtype' => 'int',
-      'phptype' => 'integer',
-      'null' => false,
-      'default' => 0,
     ),
   ),
   'indexes' => 

@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:34:17
+/* Smarty version 3.1.39, created on 2022-04-09 17:36:33
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/resource/sections/tvs.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_625145099879f4_07185703',
+  'unifunc' => 'content_625199f1e24fe6_08935204',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_625145099879f4_07185703 (Smarty_Internal_Template $_smarty_tpl) {
+function content_625199f1e24fe6_08935204 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_checkPlugins(array(0=>array('file'=>'/home/s/sportcrm/uroboros_start123_ru/public_html/core/model/smarty/plugins/function.cycle.php','function'=>'smarty_function_cycle',),));
 echo $_smarty_tpl->tpl_vars['OnResourceTVFormPrerender']->value;?>
 

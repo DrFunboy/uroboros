@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:26:03
+/* Smarty version 3.1.39, created on 2022-04-10 08:57:03
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/workspaces/index.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_6251431b2b79b6_94996171',
+  'unifunc' => 'content_625271afe17711_91666949',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6251431b2b79b6_94996171 (Smarty_Internal_Template $_smarty_tpl) {
+function content_625271afe17711_91666949 (Smarty_Internal_Template $_smarty_tpl) {
 echo (($tmp = @$_smarty_tpl->tpl_vars['error']->value)===null||$tmp==='' ? '' : $tmp);?>
 
 <div id="modx-panel-workspace-div"></div>

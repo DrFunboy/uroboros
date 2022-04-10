@@ -1,1 +1,0 @@
-{"name":"Иван Спортсмен","email":"andreyex@example.ru","contact":"Андрей Родитель"}

@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.39, created on 2022-04-09 11:19:10
+/* Smarty version 3.1.39, created on 2022-04-09 17:28:40
   from '/home/s/sportcrm/uroboros_start123_ru/public_html/mx/templates/default/footer.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.39',
-  'unifunc' => 'content_6251417eda6c62_15998516',
+  'unifunc' => 'content_62519818c12a46_71614629',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6251417eda6c62_15998516 (Smarty_Internal_Template $_smarty_tpl) {
+function content_62519818c12a46_71614629 (Smarty_Internal_Template $_smarty_tpl) {
 ?>    </div>
     <!-- #modx-content-->
     <div id="modx-footer"></div>

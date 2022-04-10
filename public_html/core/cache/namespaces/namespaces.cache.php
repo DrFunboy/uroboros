@@ -5,6 +5,12 @@
     'path' => '/home/s/sportcrm/uroboros_start123_ru/public_html/core/components/ace/',
     'assets_path' => '',
   ),
+  'console' => 
+  array (
+    'name' => 'console',
+    'path' => '/home/s/sportcrm/uroboros_start123_ru/public_html/core/components/console/',
+    'assets_path' => '/home/s/sportcrm/uroboros_start123_ru/public_html/assets/components/console/',
+  ),
   'core' => 
   array (
     'name' => 'core',
