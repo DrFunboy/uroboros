@@ -16,7 +16,7 @@
     'adm/import.html' => 10,
     'login/forgotpassword.html' => 8,
     'login/agreement.html' => 11,
-    'projects/widget.html' => 13,
+    'projects/widget/' => 13,
   ),
   'resourceMap' => 
   array (

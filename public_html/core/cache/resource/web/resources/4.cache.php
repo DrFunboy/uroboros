@@ -2,13 +2,13 @@
   'resourceClass' => 'modDocument',
   'resource' => 
   array (
-    'id' => 1,
+    'id' => 4,
     'type' => 'document',
     'contentType' => 'text/html',
-    'pagetitle' => 'Главная',
+    'pagetitle' => 'Реестр',
     'longtitle' => '',
     'description' => '',
-    'alias' => 'index',
+    'alias' => 'reestr',
     'alias_visible' => 1,
     'link_attributes' => '',
     'published' => 1,
@@ -17,100 +17,209 @@
     'parent' => 0,
     'isfolder' => 0,
     'introtext' => '',
-    'content' => '[[!loginWay]]
-<div class="card card-body animated fadeInDown">
-    [[!+rcode:notempty=`
-    <div class="alert alert-danger">Error: [[+rcode]]</div>
-    `]]
-<div class="row flex-column-reverse flex-md-row">
-    <div class="col-md-8">
-        [[-<h3>Вход для родителей или законных представителей</h3>]]
-        <div class="loginBlocks" style="display:none">Вы вошли в систему как <b class="user_fullname"></b>.
-            <a href="/?service=logout">Выйти?</a>
-        </div>
-        <div class="loginBlocks">
-            <a href="/?action=login" class="btn btn-primary showLogin"><i class="fa fa-unlock-alt"></i> Войти в личный кабинет</a>
-        
-<div class="text-center mx-auto mt-2" style="display:none;max-width:480px" id="loginForm">
-    <form method="post" action="?action=login" role="form">
-        [[+errors]]
-        <input type="hidden" name="returnUrl" value="[[+rurl]]">
-        <input type="hidden" name="service" value="login">
-        <div class="form-group">
-          <div class="form-label-group">
-            <input type="text" id="username" name="username" class="form-control placeholder-shown" required="" autofocus="">
-            <label for="username">E-mail</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="form-label-group">
-            <input type="password" id="password" name="password" class="form-control placeholder-shown" required="">
-            <label for="password">********</label>
-          </div>
-        </div>
-        <div class="form-group text-center">
-          <div class="custom-control custom-control-inline custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="rememberme" value="1" name="rememberme" checked>
-            <label class="custom-control-label" for="rememberme">Запомнить меня</label>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block mb-2">Вход</button><br>
-        <a href="/login/forgotpassword.html">Восстановление доступа</a>
-    </form>
+    'content' => '<div class="section-block my-0">
+    <table id="grid_idIncome" data-entity="idIncome"></table>
 </div>
 
-        </div>
-    </div>
-    <div class="col-md-4 animated fadeInRight mb-3">
-        <img src="/assets/id/images/snake.png" class="img-fluid mx-auto d-block" />
-    </div>
-</div>
-</div>
+[[$tplFiles]]
 
 <script>
-$(function(){
-    var user = $(\'#user_fullname\');
-    if (user.length>0) {
-        $(\'.loginBlocks\').toggle();
-        $(\'.user_fullname\').text( user.text() );
-    } else {
-        function goLogin(e){
-            if (e) e.preventDefault();
-            $(\'.showLogin.btn\').hide();
-            var lgnfrm = $(\'#loginForm\').show();
-            clubScroll(lgnfrm);
-        }
-        $(\'.showLogin\').click(goLogin);
-        var param = getUrlVars();
-        if (param.action && param.action==\'login\') goLogin();
-    }
-    $(\'.form-label-group:eq(0) > input\').trigger(\'focus\');
+var trainerData = { };
+
+SCRM.loadWSS([\'ready\',\'grid\'], function () {
+
+    $("#grid_idIncome")
+    .one(\'jqGridBeforeInit\', function(e, grOpts){
+        
+    })
+    .jqGridInit({
+        sortname: \'name\', sortorder: \'asc\',
+        search: true,
+        postData: {
+            //filters: SCRM.obj2Filter({published: \'1\'})
+        },
+        colModel:[
+            {template: idFieldTemplate},
+            {index: \'created\', label: \'Создан\',
+                template:createdTemplate, hidden: false
+            },
+            {name:\'num\', label: \'Рег. номер\', hidden: false, width: 50},
+            {name:\'status\', label: \'Статус\', editable: true, template: selTemplate,
+                width: 100,
+                clubStatus: \'idIncome\', lookupKey: \'id\'
+            },
+            {name:\'name\', label:\'Ф.И.О.\', width:200, editable: true, editrules:{required:true}},
+            /*{name:\'gender\', label: \'Пол\', width:40, hidden: false, editable: true,
+                editoptions: {
+                    defaultValue: \'[[!clubConfig?name=`Gender_main`]]\'
+                },
+                formoptions:{rowpos:1, colpos:2},
+                template: selTemplate,
+                clubStatus: \'Gender\', lookupKey: \'alias\'
+            },
+            {name:\'birth\', label: \'Дата рождения\', editable: true,
+                template: dateTemplate,
+                fltrFunc: true // TODO: Что это?
+            },*/              
+            {template: telTemplate, editable: true},
+            {name: \'email\', label: \'E-mail\', width:100, editable: true, editrules: {email: true, required: false}}, 
+            {name: \'info\', label: \'Текст обращения\', width: 500,
+                editable: true, editrules: {edithidden:true},
+                template: infoTemplate
+            },
+            /*
+            {name: \'categ\', label: \'Категория\', editable: true,
+                template: selTemplate,
+                clubStatus: \'TrainerCategory\', lookupKey: \'name\',
+                dbvalues0: \'-\'
+            },
+            {name:\'referee\', label: \'Судья\', editable: true,
+                template: selTemplate,
+                clubStatus: \'TrainerRank\', lookupKey: \'name\',
+                dbvalues0: \'-\'
+            },*/
+            [[-{name:\'sport\', label: \'Дисциплина\', editable: true, template: selTemplate,
+                editoptions: {value: makeGridOpts(club_opts.idSport)},
+                searchoptions: {value: makeGridOpts(club_opts.idSport, true)}
+            },]]
+        ],
+        rowattr: function(data) {
+            /*if (data.published != \'1\'){
+                return {\'class\': \'rowArc\'};
+            }*/
+        },
+        onSelectRow: function(rid,rr,ee) {
+            var rdata = grids.idTrainer.jqGrid(\'getRowData\', rid);
+            SCRM.link(formData, {
+                id: rid,
+                name: rdata.name,
+                rdata: rdata
+            });
+        },
+        navOpts: {add: false, edit:true, del:false}
+    })
+    .jqGrid(\'filterToolbar\')
+    .jqGridColumns()
+    .jqGridExport();
+
 });
-</script>',
+</script>
+
+<script id="tpl_trainers" type="text/x-jsrender">
+    <select class="custom-select" data-link="{:trainer:} class{merge:bad_trainer toggle=\'is-invalid\'}">
+    <option value=""></option>
+    {^{for idTrainer}}
+        <option value="{{:id}}">{{:name}}</option>
+    {{/for}}
+    </select>
+    <fieldset disabled1="disabled" class="form-group mt-2">
+        <div class="custom-control custom-control-inline custom-radio">
+            <input type="radio" class="custom-control-input" name="change_type" id="ct_repeat"
+                value="repeat" data-link="change_mode">
+            <label class="custom-control-label" for="ct_repeat">Постоянно</label>
+        </div>
+        <div class="custom-control custom-control-inline custom-radio">
+            <input type="radio" class="custom-control-input" name="change_type" id="ct_once"
+                value="once" data-link="change_mode">
+            <label class="custom-control-label" for="ct_once">Временно</label>
+        </div>
+    </fieldset>
+</script>
+
+<script id="tpl_schEditor" type="text/x-jsrender">
+<div class="mb-2 d-flex">
+    <button class="btn btn-success btn-sm" data-link="{on \'click\' schEditorAdd}"><i class="fa fa-plus"></i></button>
+    <div class="dropdown mx-1">
+        <button data-toggle="dropdown" class="btn btn-primary btn-sm d-flex flex-nowrap align-items-center" data-link="disabled{:selRows^length==0}"
+            disabled="disabled">Действия
+            <small data-link="text{:selRows^length} visible{:selRows^length>0}" class="badge badge-pill badge-warning ml-1"></small>
+        </button>
+        <div class="dropdown-menu">
+            <div class="dropdown-arrow"></div>
+            <a href="#" class="dropdown-item" data-link="{on ~changeTrainer}">Сменить тренера</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item" data-link="{on ~deleteSch}">Удалить</a>
+        </div>
+    </div>
+    <button class="btn btn-secondary btn-sm" data-link="{on ~showFilter}"><i class="fa fa-filter"></i></button>
+</div>
+<div id="schEditorFltr" data-link="visible{:showFilter}"></div>
+</script>
+
+<script id="tpl_trainerCabinet" type="text/x-jsrender">
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="#" target="_blank" data-link="href{:\'/trainer/lessons.html?trainer=\'+uid}">
+            <i class="fa fa-sign-in"></i>
+            <span data-link="html{:username || \'Кабинет\'}"></span>
+        </a>
+        <div class="card-title-control">
+            {^{if !iduser}}
+            <button class="btn btn-icon btn-light" data-link="{on ~idUser}"><i class="fa fa-key"></i></button>
+            {{else}}
+            <div class="dropdown">
+                <button class="btn btn-icon btn-subtle-success" data-toggle="dropdown"><i class="fa fa-key"></i></button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="dropdown-arrow"></div>
+                    <a href="#" class="dropdown-item"
+                        data-run="/chunk/forgotpassword" data-link="data-username{:username}">Восстановление пароля</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item"
+                        data-link="{on ~idUser}">Отключить</a>
+                </div>
+            </div>
+            {{/if}}
+            [[-<label class="switcher-control">
+                <input type="checkbox" class="switcher-input" data-link="checked{:sp^iduser} {on \'change\' ~idUser}">
+                <span class="switcher-indicator"></span>
+            </label>]]
+        </div>
+    </div>
+</script>
+
+[[-var confirm_schdel = true;
+    $(document).on(\'change\', \'#confirm_schdel\', function(){
+        confirm_schdel = !$(this).prop(\'checked\');
+    });]]
+    
+[[-<select id="h_start" class="form-control sel-hour"></select>
+<select id="m_start" class="form-control sel-minute"></select>]]
+
+[[-<input id="duration" class="form-control" size="3" value="45"> минут
+<select id="h_end" class="form-control sel-hour"></select>
+<select id="m_end" class="form-control sel-minute"></select>]]
+
+[[-for (var t = 0; t <= 23; t++){
+    var lzt = leadZero(t);
+    $(\'.sel-hour\').append(\'<option value="\'+ lzt +\':">\'+ lzt +\':</option>\');
+}
+for (var t = 0; t <= 55; t += 5){
+    var lzt = leadZero(t);
+    $(\'.sel-minute\').append(\'<option value="\'+ lzt +\':00">\'+ lzt +\'</option>\');
+}]]',
     'richtext' => 0,
     'template' => 2,
-    'menuindex' => 0,
-    'searchable' => 1,
+    'menuindex' => 3,
+    'searchable' => 0,
     'cacheable' => 1,
     'createdby' => 1,
-    'createdon' => 1649492122,
+    'createdon' => 1649518927,
     'editedby' => 1,
-    'editedon' => 1649571660,
+    'editedon' => 1649584545,
     'deleted' => 0,
     'deletedon' => 0,
     'deletedby' => 0,
-    'publishedon' => 0,
-    'publishedby' => 0,
+    'publishedon' => 1649518920,
+    'publishedby' => 1,
     'menutitle' => '',
     'donthit' => 0,
     'privateweb' => 0,
     'privatemgr' => 0,
     'content_dispo' => 0,
-    'hidemenu' => 1,
+    'hidemenu' => 0,
     'class_key' => 'modDocument',
     'context_key' => 'web',
     'content_type' => 1,
-    'uri' => 'index.html',
+    'uri' => 'reestr.html',
     'uri_override' => 0,
     'hide_children_in_tree' => 0,
     'show_in_tree' => 1,
@@ -121,7 +230,7 @@ $(function(){
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
     
-    <title>Главная | РосМедНадзор</title>
+    <title>Реестр | РосМедНадзор</title>
 
 <link rel="stylesheet" href="/assets/id/wss/theme.min.css?v=1074" />
 
@@ -131,7 +240,7 @@ $(function(){
 [[!+StartupHTMLBlock]]
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
 </head>
-<body id="body1" class="spinner-parent" data-user="[[!+modx.user.id]]" data-mxq="[^q^]">
+<body id="body4" class="spinner-parent" data-user="[[!+modx.user.id]]" data-mxq="[^q^]">
 <div class="app">
     <nav class="app-header app-header-dark d-print-none start-data-link">
         <div class="top-bar">
@@ -188,7 +297,7 @@ $(function(){
               <div class="page1">
                 <header class="page-navs shadow-sm pr-3 d-print-none start-data-link">
                     <div class="account-summary" data-link="visible{:!topNavTabs||!topNavTabs^length}">
-                      <h2 class="card-title" data-link="html^{:title}">Главная</h2>
+                      <h2 class="card-title" data-link="html^{:title}">Реестр</h2>
                       <h6 class="card-subtitle text-muted" data-link="html^{:subtitle}"></h6>
                     </div>
                     <div class="nav-scroller" id="topNavTabs" data-link="visible{:topNavTabs^length}">
@@ -200,76 +309,166 @@ $(function(){
                   
                   
                     <div class="page-section">
-[[!loginWay]]
-<div class="card card-body animated fadeInDown">
-    [[!+rcode:notempty=`
-    <div class="alert alert-danger">Error: [[+rcode]]</div>
-    `]]
-<div class="row flex-column-reverse flex-md-row">
-    <div class="col-md-8">
-        
-        <div class="loginBlocks" style="display:none">Вы вошли в систему как <b class="user_fullname"></b>.
-            <a href="/?service=logout">Выйти?</a>
-        </div>
-        <div class="loginBlocks">
-            <a href="/?action=login" class="btn btn-primary showLogin"><i class="fa fa-unlock-alt"></i> Войти в личный кабинет</a>
-        
-<div class="text-center mx-auto mt-2" style="display:none;max-width:480px" id="loginForm">
-    <form method="post" action="?action=login" role="form">
-        [[+errors]]
-        <input type="hidden" name="returnUrl" value="[[+rurl]]">
-        <input type="hidden" name="service" value="login">
-        <div class="form-group">
-          <div class="form-label-group">
-            <input type="text" id="username" name="username" class="form-control placeholder-shown" required="" autofocus="">
-            <label for="username">E-mail</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="form-label-group">
-            <input type="password" id="password" name="password" class="form-control placeholder-shown" required="">
-            <label for="password">********</label>
-          </div>
-        </div>
-        <div class="form-group text-center">
-          <div class="custom-control custom-control-inline custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="rememberme" value="1" name="rememberme" checked>
-            <label class="custom-control-label" for="rememberme">Запомнить меня</label>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block mb-2">Вход</button><br>
-        <a href="/login/forgotpassword.html">Восстановление доступа</a>
-    </form>
+<div class="section-block my-0">
+    <table id="grid_idIncome" data-entity="idIncome"></table>
 </div>
 
-        </div>
-    </div>
-    <div class="col-md-4 animated fadeInRight mb-3">
-        <img src="/assets/id/images/snake.png" class="img-fluid mx-auto d-block" />
-    </div>
-</div>
-</div>
+[[$tplFiles]]
 
 <script>
-$(function(){
-    var user = $(\'#user_fullname\');
-    if (user.length>0) {
-        $(\'.loginBlocks\').toggle();
-        $(\'.user_fullname\').text( user.text() );
-    } else {
-        function goLogin(e){
-            if (e) e.preventDefault();
-            $(\'.showLogin.btn\').hide();
-            var lgnfrm = $(\'#loginForm\').show();
-            clubScroll(lgnfrm);
-        }
-        $(\'.showLogin\').click(goLogin);
-        var param = getUrlVars();
-        if (param.action && param.action==\'login\') goLogin();
-    }
-    $(\'.form-label-group:eq(0) > input\').trigger(\'focus\');
+var trainerData = { };
+
+SCRM.loadWSS([\'ready\',\'grid\'], function () {
+
+    $("#grid_idIncome")
+    .one(\'jqGridBeforeInit\', function(e, grOpts){
+        
+    })
+    .jqGridInit({
+        sortname: \'name\', sortorder: \'asc\',
+        search: true,
+        postData: {
+            //filters: SCRM.obj2Filter({published: \'1\'})
+        },
+        colModel:[
+            {template: idFieldTemplate},
+            {index: \'created\', label: \'Создан\',
+                template:createdTemplate, hidden: false
+            },
+            {name:\'num\', label: \'Рег. номер\', hidden: false, width: 50},
+            {name:\'status\', label: \'Статус\', editable: true, template: selTemplate,
+                width: 100,
+                clubStatus: \'idIncome\', lookupKey: \'id\'
+            },
+            {name:\'name\', label:\'Ф.И.О.\', width:200, editable: true, editrules:{required:true}},
+            /*{name:\'gender\', label: \'Пол\', width:40, hidden: false, editable: true,
+                editoptions: {
+                    defaultValue: \'[[!clubConfig?name=`Gender_main`]]\'
+                },
+                formoptions:{rowpos:1, colpos:2},
+                template: selTemplate,
+                clubStatus: \'Gender\', lookupKey: \'alias\'
+            },
+            {name:\'birth\', label: \'Дата рождения\', editable: true,
+                template: dateTemplate,
+                fltrFunc: true // TODO: Что это?
+            },*/              
+            {template: telTemplate, editable: true},
+            {name: \'email\', label: \'E-mail\', width:100, editable: true, editrules: {email: true, required: false}}, 
+            {name: \'info\', label: \'Текст обращения\', width: 500,
+                editable: true, editrules: {edithidden:true},
+                template: infoTemplate
+            },
+            /*
+            {name: \'categ\', label: \'Категория\', editable: true,
+                template: selTemplate,
+                clubStatus: \'TrainerCategory\', lookupKey: \'name\',
+                dbvalues0: \'-\'
+            },
+            {name:\'referee\', label: \'Судья\', editable: true,
+                template: selTemplate,
+                clubStatus: \'TrainerRank\', lookupKey: \'name\',
+                dbvalues0: \'-\'
+            },*/
+            
+        ],
+        rowattr: function(data) {
+            /*if (data.published != \'1\'){
+                return {\'class\': \'rowArc\'};
+            }*/
+        },
+        onSelectRow: function(rid,rr,ee) {
+            var rdata = grids.idTrainer.jqGrid(\'getRowData\', rid);
+            SCRM.link(formData, {
+                id: rid,
+                name: rdata.name,
+                rdata: rdata
+            });
+        },
+        navOpts: {add: false, edit:true, del:false}
+    })
+    .jqGrid(\'filterToolbar\')
+    .jqGridColumns()
+    .jqGridExport();
+
 });
 </script>
+
+<script id="tpl_trainers" type="text/x-jsrender">
+    <select class="custom-select" data-link="{:trainer:} class{merge:bad_trainer toggle=\'is-invalid\'}">
+    <option value=""></option>
+    {^{for idTrainer}}
+        <option value="{{:id}}">{{:name}}</option>
+    {{/for}}
+    </select>
+    <fieldset disabled1="disabled" class="form-group mt-2">
+        <div class="custom-control custom-control-inline custom-radio">
+            <input type="radio" class="custom-control-input" name="change_type" id="ct_repeat"
+                value="repeat" data-link="change_mode">
+            <label class="custom-control-label" for="ct_repeat">Постоянно</label>
+        </div>
+        <div class="custom-control custom-control-inline custom-radio">
+            <input type="radio" class="custom-control-input" name="change_type" id="ct_once"
+                value="once" data-link="change_mode">
+            <label class="custom-control-label" for="ct_once">Временно</label>
+        </div>
+    </fieldset>
+</script>
+
+<script id="tpl_schEditor" type="text/x-jsrender">
+<div class="mb-2 d-flex">
+    <button class="btn btn-success btn-sm" data-link="{on \'click\' schEditorAdd}"><i class="fa fa-plus"></i></button>
+    <div class="dropdown mx-1">
+        <button data-toggle="dropdown" class="btn btn-primary btn-sm d-flex flex-nowrap align-items-center" data-link="disabled{:selRows^length==0}"
+            disabled="disabled">Действия
+            <small data-link="text{:selRows^length} visible{:selRows^length>0}" class="badge badge-pill badge-warning ml-1"></small>
+        </button>
+        <div class="dropdown-menu">
+            <div class="dropdown-arrow"></div>
+            <a href="#" class="dropdown-item" data-link="{on ~changeTrainer}">Сменить тренера</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item" data-link="{on ~deleteSch}">Удалить</a>
+        </div>
+    </div>
+    <button class="btn btn-secondary btn-sm" data-link="{on ~showFilter}"><i class="fa fa-filter"></i></button>
+</div>
+<div id="schEditorFltr" data-link="visible{:showFilter}"></div>
+</script>
+
+<script id="tpl_trainerCabinet" type="text/x-jsrender">
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="#" target="_blank" data-link="href{:\'/trainer/lessons.html?trainer=\'+uid}">
+            <i class="fa fa-sign-in"></i>
+            <span data-link="html{:username || \'Кабинет\'}"></span>
+        </a>
+        <div class="card-title-control">
+            {^{if !iduser}}
+            <button class="btn btn-icon btn-light" data-link="{on ~idUser}"><i class="fa fa-key"></i></button>
+            {{else}}
+            <div class="dropdown">
+                <button class="btn btn-icon btn-subtle-success" data-toggle="dropdown"><i class="fa fa-key"></i></button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="dropdown-arrow"></div>
+                    <a href="#" class="dropdown-item"
+                        data-run="/chunk/forgotpassword" data-link="data-username{:username}">Восстановление пароля</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item"
+                        data-link="{on ~idUser}">Отключить</a>
+                </div>
+            </div>
+            {{/if}}
+            
+        </div>
+    </div>
+</script>
+
+
+    
+
+
+
+
+
                     </div>
                   
                   
@@ -361,7 +560,7 @@ $(function(){
 </script>
 
 <script>
-    SCRM.app.title = \'Главная\';
+    SCRM.app.title = \'Реестр\';
     $(\'.start-data-link\').link(true, SCRM.app);
 </script>
 
@@ -382,7 +581,7 @@ $(\'.ib-top\').prependTo(\'ul.header-nav\').find(\'a\').click(function(e){
 [[!+BottomHTMLBlock]]
 </body>
 </html>',
-    '_isForward' => true,
+    '_isForward' => false,
   ),
   'contentType' => 
   array (
@@ -394,8 +593,45 @@ $(\'.ib-top\').prependTo(\'ul.header-nav\').find(\'a\').click(function(e){
     'headers' => NULL,
     'binary' => 0,
   ),
+  'resourceGroups' => 
+  array (
+    3 => 
+    array (
+      'id' => 3,
+      'document_group' => 1,
+      'document' => 4,
+    ),
+  ),
   'policyCache' => 
   array (
+    'modAccessResourceGroup' => 
+    array (
+      1 => 
+      array (
+        0 => 
+        array (
+          'principal' => '2',
+          'authority' => '9999',
+          'policy' => 
+          array (
+            'add_children' => true,
+            'create' => true,
+            'copy' => true,
+            'delete' => true,
+            'list' => true,
+            'load' => true,
+            'move' => true,
+            'publish' => true,
+            'remove' => true,
+            'save' => true,
+            'steal_lock' => true,
+            'undelete' => true,
+            'unpublish' => true,
+            'view' => true,
+          ),
+        ),
+      ),
+    ),
   ),
   'elementCache' => 
   array (
@@ -2453,107 +2689,6 @@ if (!empty($toPlaceholder)) {
 } else {
     return $output;
 }',
-        ),
-        'policies' => 
-        array (
-        ),
-        'source' => 
-        array (
-          'id' => 1,
-          'name' => 'Filesystem',
-          'description' => '',
-          'class_key' => 'sources.modFileMediaSource',
-          'properties' => 
-          array (
-          ),
-          'is_stream' => true,
-        ),
-      ),
-      'loginWay' => 
-      array (
-        'fields' => 
-        array (
-          'id' => 23,
-          'source' => 1,
-          'property_preprocess' => false,
-          'name' => 'loginWay',
-          'description' => '',
-          'editor_type' => 0,
-          'category' => 0,
-          'cache_type' => 0,
-          'snippet' => '$rcode = http_response_code();
-//$web = $modx->user->hasSessionContext($modx->context->get(\'key\'));
-//$modx->log(modX::LOG_LEVEL_ERROR, "loginWay{$rcode}-{$web}.return: ".$_POST[\'returnUrl\'].\'; url:\'.$_SERVER[\'HTTP_HOST\'].$_SERVER[\'REQUEST_URI\'] );
-    
-if ($rcode!=200) {
-    $modx->setPlaceholders(array(
-       \'rcode\' => $rcode,
-       \'rurl\' => $_SERVER[\'REQUEST_URI\'],
-    ));
-} elseif ($user || $modx->user->hasSessionContext($modx->context->get(\'key\'))) {
-    //if (!empty($_SESSION[\'club_groups\'])){
-        //$ugroups = $modx->user->getUserGroupNames(); // при входе modx.user еще нету
-        
-        $ugroups = $modx->getOption(\'scrm_ugroups\');
-        foreach(getClubStatus(\'idPermission\', \'extended\') as $perm) {
-            if (in_array($perm[\'alias\'], $ugroups)) {
-                if (!empty($perm[\'extended\'][\'crew\'])) {
-                    $_SESSION[\'club_crew\'] = true;
-                }
-                if (empty($loginUrl)) {
-                    $loginUrl = $perm[\'extended\'][\'loginUrl\'];
-                }
-                //break;
-            }
-        }
-        if (!empty($loginUrl)) {
-            $_SESSION[\'club_loginUrl\'] = $loginUrl;
-            $modx->sendRedirect($loginUrl);
-        }
-    //}
-}
-
-return "";',
-          'locked' => false,
-          'properties' => 
-          array (
-          ),
-          'moduleguid' => '',
-          'static' => false,
-          'static_file' => '',
-          'content' => '$rcode = http_response_code();
-//$web = $modx->user->hasSessionContext($modx->context->get(\'key\'));
-//$modx->log(modX::LOG_LEVEL_ERROR, "loginWay{$rcode}-{$web}.return: ".$_POST[\'returnUrl\'].\'; url:\'.$_SERVER[\'HTTP_HOST\'].$_SERVER[\'REQUEST_URI\'] );
-    
-if ($rcode!=200) {
-    $modx->setPlaceholders(array(
-       \'rcode\' => $rcode,
-       \'rurl\' => $_SERVER[\'REQUEST_URI\'],
-    ));
-} elseif ($user || $modx->user->hasSessionContext($modx->context->get(\'key\'))) {
-    //if (!empty($_SESSION[\'club_groups\'])){
-        //$ugroups = $modx->user->getUserGroupNames(); // при входе modx.user еще нету
-        
-        $ugroups = $modx->getOption(\'scrm_ugroups\');
-        foreach(getClubStatus(\'idPermission\', \'extended\') as $perm) {
-            if (in_array($perm[\'alias\'], $ugroups)) {
-                if (!empty($perm[\'extended\'][\'crew\'])) {
-                    $_SESSION[\'club_crew\'] = true;
-                }
-                if (empty($loginUrl)) {
-                    $loginUrl = $perm[\'extended\'][\'loginUrl\'];
-                }
-                //break;
-            }
-        }
-        if (!empty($loginUrl)) {
-            $_SESSION[\'club_loginUrl\'] = $loginUrl;
-            $modx->sendRedirect($loginUrl);
-        }
-    //}
-}
-
-return "";',
         ),
         'policies' => 
         array (
